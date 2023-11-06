@@ -1,0 +1,8 @@
+papers:
+1. min avg
+(1) Optimizing Client Assignment for Enhancing Interactivity in Distributed Interactive Applications
+    algorithm: Modify-Assignment
+
+2. min max
+(1) The Server Provisioning Problem for Continuous Distributed Interactive Applications
+    algorithm: M-Greedy
