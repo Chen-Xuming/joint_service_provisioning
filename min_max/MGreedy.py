@@ -27,6 +27,8 @@ class MGreedyAlgorithm(BaseMinMaxAlgorithm):
         for u in range(self.env.user_num):
             self.assignment[u] = None
 
+        self.M = self.env.site_num      # fixme
+
     def run(self):
         self.start_time = time()
 
@@ -45,8 +47,8 @@ class MGreedyAlgorithm(BaseMinMaxAlgorithm):
     def solve(self):
         max_delay = math.inf
 
-        while len(self.selected_sites) < self.env.site_num:
-            self.DEBUG("max_delay = ".format(max_delay))
+        while len(self.selected_sites) < self.M:
+            self.DEBUG("max_delay = {}".format(max_delay))
             best_assignment = None          # 本轮的最佳assignment
             s_star = None
             for s in self.candidate_sites:
@@ -170,14 +172,34 @@ if __name__ == "__main__":
     # u_seed = 4932794917
     print("user_seed = {}".format(u_seed))
 
-    env_seed = 58972
+    env_seed = 99497
     print("env_seed: ", env_seed)
 
     num_user = 50
 
-
+    print("----------------------------------------------------------")
     env = Environment(conf, env_seed)
     env.reset(num_user=num_user, user_seed=u_seed)
     mg = MGreedyAlgorithm(env)
+    mg.debug_flag = True
+    mg.M = 4
+    mg.run()
+    print(mg.get_results())
+
+    print("----------------------------------------------------------")
+    env = Environment(conf, env_seed)
+    env.reset(num_user=num_user, user_seed=u_seed)
+    mg = MGreedyAlgorithm(env)
+    mg.debug_flag = True
+    mg.M = 8
+    mg.run()
+    print(mg.get_results())
+
+    print("----------------------------------------------------------")
+    env = Environment(conf, env_seed)
+    env.reset(num_user=num_user, user_seed=u_seed)
+    mg = MGreedyAlgorithm(env)
+    mg.debug_flag = True
+    mg.M = mg.env.site_num
     mg.run()
     print(mg.get_results())

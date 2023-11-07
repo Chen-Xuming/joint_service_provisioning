@@ -10,10 +10,10 @@ import numpy as np
 
 from heapdict import heapdict
 
-class MinMaxOurs_V2(BaseMinMaxAlgorithm):
+class MinMaxSurrogate(BaseMinMaxAlgorithm):
     def __init__(self, env, consider_cost_tq=True, stable_only=False, *args, **kwargs):
         BaseMinMaxAlgorithm.__init__(self, env, *args, **kwargs)
-        self.algorithm_name = "min_max_ours" if "algorithm_name" not in kwargs else kwargs["algorithm_name"]
+        self.algorithm_name = "min_max_surrogate" if "algorithm_name" not in kwargs else kwargs["algorithm_name"]
 
         self.consider_cost_tq = consider_cost_tq
         self.stable_only = stable_only  # 仅当 consider_cost_tq=True 时有效
@@ -24,6 +24,8 @@ class MinMaxOurs_V2(BaseMinMaxAlgorithm):
 
         self.n = self.env.user_num
         self.n_2 = self.env.user_num ** 2
+
+        self.all_user_set = set([i for i in range(self.env.user_num)])
 
         self.alpha = 0.0005      # fixme: adjust this value
         self.epsilon = 5
@@ -47,9 +49,9 @@ class MinMaxOurs_V2(BaseMinMaxAlgorithm):
         self.psi_c_arr = np.zeros(self.env.user_num)
         self.psi_c_pi_arr = np.zeros(self.env.user_num)
         self.psi_arr = np.zeros((self.env.user_num, self.env.user_num))
-        for i in range(self.env.user_num):
-            for j in range(self.env.user_num):
-                self.psi_arr[i][j] = 1 / self.n_2
+        # for i in range(self.env.user_num):
+        #     for j in range(self.env.user_num):
+        #         self.psi_arr[i][j] = 1 / self.n_2
 
         # 存储每个服务卸载到各个站点，最佳的服务器个数
         self.best_x_serviceA = np.zeros((self.env.user_num, self.env.site_num))
@@ -74,11 +76,13 @@ class MinMaxOurs_V2(BaseMinMaxAlgorithm):
         self.total_iterations = 0
         self.best_iteration = 0
 
-        self.max_iteration = 50     # fixme: fixme: adjust this value
+        self.max_iteration = self.n * 2     # fixme: adjust this value
 
         # 记录 f 和 g 值的变化
         self.f_values = []
         self.g_values = []
+
+        self.important_user_pairs = list()      # 时延和开销之和较高的
 
         self.debug_flag = False
 
@@ -89,7 +93,6 @@ class MinMaxOurs_V2(BaseMinMaxAlgorithm):
 
         self.get_running_time()
         self.get_target_value()
-        # self.result_info()
 
         self.DEBUG("max_delay = {}".format(self.max_delay))
         self.DEBUG("final_cost = {}".format(self.final_avg_cost))
@@ -105,6 +108,8 @@ class MinMaxOurs_V2(BaseMinMaxAlgorithm):
         f_best = math.inf
 
         all_user_set = set([i for i in range(self.env.user_num)])
+
+        self.get_initial_psi()
 
         while (f_best - g_best) >= self.epsilon:
             k = k + 1
@@ -158,17 +163,20 @@ class MinMaxOurs_V2(BaseMinMaxAlgorithm):
             self.DEBUG("cur-f / best-f = {:.4f} / {:.4f}".format(current_f, f_best))
             self.DEBUG("cur-g / best-g = {:.4f} / {:.4f}".format(current_g, g_best))
 
-            """ 5. Update Sub-gradient """
-            alpha_k = self.alpha / k
-            alpha_k = max(alpha_k, self.alpha / 20)         # fixme
-            self.DEBUG("alpha_k = {}".format(alpha_k))
-            for i in range(self.env.user_num):
-                for j in range(self.env.user_num):
-                    self.psi_arr[i][j] += alpha_k * self.T_matrix[i][j]
+            """ 5. Update Psi Matrix """
+            self.update_psi_matrix()
 
-            """ 6. Projection """
-            self.projection()
-            self.check_psi_satisfy_constraint()
+            # """ 5. Update Sub-gradient """
+            # alpha_k = self.alpha / k
+            # alpha_k = max(alpha_k, self.alpha / 20)         # fixme
+            # self.DEBUG("alpha_k = {}".format(alpha_k))
+            # for i in range(self.env.user_num):
+            #     for j in range(self.env.user_num):
+            #         self.psi_arr[i][j] += alpha_k * self.T_matrix[i][j]
+            #
+            # """ 6. Projection """
+            # self.projection()
+            # self.check_psi_satisfy_constraint()
 
             if k == self.max_iteration:
                 break
@@ -178,6 +186,41 @@ class MinMaxOurs_V2(BaseMinMaxAlgorithm):
 
         self.total_iterations = k
         self.best_iteration = k_star
+
+    def get_initial_psi(self):
+        self.build_graph()
+
+        self.psi_c_arr = np.ones(self.n)
+        self.psi_c_pi_arr = np.ones(self.n)
+        self.resource_allocation(set(), set(), self.all_user_set, self.all_user_set)
+
+        self.set_edge_weight(self.all_user_set, self.all_user_set)
+        self.get_all_stp(self.all_user_set, self.all_user_set)
+
+        # 获取交互时延最大的用户对，把它们加入到集合中
+        user_pair, max_stp_len = self.shortest_path_lengths.peekitem()
+        user_i = int(user_pair[0][2:])
+        user_j = int(user_pair[1][2:])
+        user_pair = (user_i, user_j)
+        self.important_user_pairs.append(user_pair)
+
+        self.DEBUG("max-stp: {}, len = {}".format(user_pair, max_stp_len))
+
+        # 修改权重矩阵
+        size = len(self.important_user_pairs)
+        weight = 1 / size
+        for pair in self.important_user_pairs:
+            self.psi_arr[pair[0]][pair[1]] = weight
+
+        # 重置数据结构
+        self.graph = None
+        self.phi_cs_arr = np.zeros((self.env.user_num, self.env.site_num))
+        self.phi_cpi_spi_arr = np.zeros((self.env.user_num, self.env.site_num))
+        self.o_cs_arr = np.zeros((self.env.user_num, self.env.site_num))
+        self.o_cpi_spi_arr = np.zeros((self.env.user_num, self.env.site_num))
+
+        self.shortest_paths.clear()
+        self.shortest_path_lengths = heapdict()
 
     """ 根据用户权重计算进行资源分配 """
     def resource_allocation(self, c0: set, c0_pi: set, c1: set, c1_pi: set):
@@ -376,6 +419,19 @@ class MinMaxOurs_V2(BaseMinMaxAlgorithm):
                 self.graph["s3{}".format(site_spi)]["u4{}".format(user_cpi)]['weight'] = weight
 
         self.reversed_graph = nx.reverse(self.graph, copy=True)
+
+    def get_all_stp_max_heap(self, c1: set, c1_pi: set):
+        self.shortest_paths.clear()
+        self.shortest_path_lengths = heapdict()
+
+        for user_c in c1:
+            self.shortest_paths["u1{}".format(user_c)] = dict()
+
+            lens, paths = nx.single_source_dijkstra(self.graph, "u1{}".format(user_c))
+
+            for user_cpi in c1_pi:
+                self.shortest_paths["u1{}".format(user_c)]["u4{}".format(user_cpi)] = paths["u4{}".format(user_cpi)]
+                self.shortest_path_lengths[("u1{}".format(user_c), "u4{}".format(user_cpi))] = -lens["u4{}".format(user_cpi)]   # 大根堆
 
     def get_all_stp(self, c1: set, c1_pi: set):
         self.shortest_paths.clear()
@@ -581,6 +637,49 @@ class MinMaxOurs_V2(BaseMinMaxAlgorithm):
                 service.num_server = 0
                 service.queuing_delay = 0
 
+    def update_psi_matrix(self):
+        # 计算f值最大的用户对
+        max_user_pair, max_f = self.compute_max_latency_and_weighted_cost_user_pair()
+        if max_user_pair in self.important_user_pairs:
+            self.DEBUG("user_pair {} is already in important_user_pairs!".format(max_user_pair))
+        self.DEBUG("max_user_pair = {}, max_f = {}".format(max_user_pair, max_f))
+
+        self.important_user_pairs.append(max_user_pair)
+
+        # 更新psi
+        self.psi_arr = np.zeros((self.env.user_num, self.env.user_num))
+        size = len(self.important_user_pairs)
+        weight = 1 / size
+        for up in self.important_user_pairs:
+            self.psi_arr[up[0]][up[1]] += weight
+
+    def compute_max_latency_and_weighted_cost_user_pair(self):
+        user_pair = None
+        max_f = -1
+        for i in range(self.n):
+            user_from = self.env.users[i]       # type: UserNode
+
+            for j in range(self.n):
+                user_to = self.env.users[j]     # type: UserNode
+
+                f = 0
+                f += self.env.tx_user_node[i][user_from.service_a.node_id] * self.env.data_size[0]    # ms
+                f += 1 / user_from.service_a.service_rate * 1000                                      # ms
+                f += user_from.service_a.queuing_delay * 1000                                         # ms
+                f += self.env.eta * (user_from.service_a.price * user_from.service_a.num_server)
+
+                f += self.env.tx_node_node[user_from.service_a.node_id][user_to.service_r.node_id] * self.env.data_size[1]
+
+                f += self.env.tx_node_user[user_to.service_r.node_id][j] * self.env.data_size[2]
+                f += 1 / user_to.service_r.service_rate * 1000
+                f += user_to.service_r.queuing_delay * 1000
+                f += self.env.eta * (user_to.service_r.price * user_to.service_r.num_server)
+
+                if f > max_f:
+                    max_f = f
+                    user_pair = (i, j)
+        return user_pair, max_f
+
     def DEBUG(self, info: str):
         if self.debug_flag:
             print(info)
@@ -590,9 +689,9 @@ if __name__ == "__main__":
     import random
     from configuration.config import config as conf
     from min_max.nearest import NearestAlgorithm
-    from min_max.min_max_ours import MinMaxOurs as MinMaxOurs_V1
+    from min_max.min_max_ours_v2 import MinMaxOurs_V2 as MinMaxOurs
     from min_max.MGreedy import MGreedyAlgorithm
-    from min_max.min_avg_for_min_max import MinAvgForMinMax
+    from min_avg.min_avg_ours import MinAvgOurs
     from min_max.stp_max_first import StpMaxFirst
 
     print("==================== env  config ===============================")
@@ -627,7 +726,7 @@ if __name__ == "__main__":
     for i in range(1):
         print("========================= iteration {} ============================".format(i + 1))
         u_seed = random.randint(0, 10000000000)
-        # u_seed = 7040435858
+        # u_seed = 4486628981   8010712550
         print("user_seed = {}".format(u_seed))
 
         print("------------- Nearest ------------------------")
@@ -637,12 +736,12 @@ if __name__ == "__main__":
         nearest_alg.run()
         print(nearest_alg.get_results())
 
-        print("------------- Min-Avg Algorithm ------------------------")
-        env = Environment(conf, env_seed)
-        env.reset(num_user=num_user, user_seed=u_seed)
-        min_avg_alg = MinAvgForMinMax(env, consider_cost_tq=True, stable_only=False)
-        min_avg_alg.run()
-        print(min_avg_alg.get_results())
+        # print("------------- Min-Avg Algorithm ------------------------")
+        # env = Environment(conf, env_seed)
+        # env.reset(num_user=num_user, user_seed=u_seed)
+        # min_avg_alg = MinAvgOurs(env, consider_cost_tq=True, stable_only=False)
+        # min_avg_alg.run()
+        # print(min_avg_alg.get_results())
         # temp_f, temp_max_delay, temp_avg_cost = min_avg_alg.env.compute_target_function_value("min-max")
         # print("f_value = {:.4f}, max_delay = {:.4f} ms, avg_cost = {:.4f}".format(temp_f, temp_max_delay * 1000, temp_avg_cost))
 
@@ -660,37 +759,13 @@ if __name__ == "__main__":
         # mg_alg.run()
         # print(mg_alg.get_results())
 
-        # print("------------- Ours V1 ------------------------")
-        # env = Environment(conf, env_seed)
-        # env.reset(num_user=num_user, user_seed=u_seed)
-        # our_alg_v1 = MinMaxOurs_V1(env)
-        # our_alg_v1.debug_flag = True
-        # if num_user <= 70:
-        #     our_alg_v1.alpha = 5e-5
-        # else:
-        #     our_alg_v1.alpha = 1e-5
-        # our_alg_v1.epsilon = 15
-        # our_alg_v1.run()
-        # print(our_alg_v1.get_results())
-        # print("[iterations = {}, best_iteration = {}]".format(our_alg_v1.total_iterations, our_alg_v1.best_iteration))
-        # draw_fg(our_alg_v1.f_values, our_alg_v1.g_values)
-
-        print("------------- Ours V2 ------------------------")
+        print("------------- Ours ------------------------")
         env = Environment(conf, env_seed)
         env.reset(num_user=num_user, user_seed=u_seed)
-        our_alg_v2 = MinMaxOurs_V2(env)
-        our_alg_v2.debug_flag = True
+        surrogate_alg = MinMaxSurrogate(env)
+        surrogate_alg.debug_flag = True
 
-        if num_user <= 60:
-            our_alg_v2.alpha = 5e-5
-        elif 60 < num_user <= 80:
-            our_alg_v2.alpha = 3e-5
-        elif num_user > 80:
-            our_alg_v2.alpha = 1e-5
-
-        our_alg_v2.epsilon = 15
-        our_alg_v2.run()
-        print(our_alg_v2.get_results())
-        print("[iterations = {}, best_iteration = {}]".format(our_alg_v2.total_iterations, our_alg_v2.best_iteration))
-        draw_fg(our_alg_v2.f_values, our_alg_v2.g_values)
-
+        surrogate_alg.run()
+        print(surrogate_alg.get_results())
+        print("[iterations = {}, best_iteration = {}]".format(surrogate_alg.total_iterations, surrogate_alg.best_iteration))
+        draw_fg(surrogate_alg.f_values, surrogate_alg.g_values)
