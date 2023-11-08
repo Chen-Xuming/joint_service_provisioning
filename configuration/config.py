@@ -61,5 +61,5 @@ config = {
     # "minmax_price_A_edge": (3, 3),                  # (2, 4)
     # "minmax_price_R_edge": (5, 5),                  # (2, 4)
 
-    "eta": 0,
+    "eta": 0.5,
 }

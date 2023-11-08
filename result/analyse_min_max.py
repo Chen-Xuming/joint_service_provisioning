@@ -12,11 +12,15 @@ markersize = 8
 plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
 fontsize_legend = 20
 # color_list = ['#2878b5',  '#F28522', '#58B272', '#FF1F5B', '#991a4e', '#1f77b4', '#A6761D', '#009ADE', '#AF58BA']
-color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
+# color_list = ['#002c53', '#ffa510', '#0c84c6', '#ffbd66', '#f74d4d', '#2455a4', '#41b7ac']
+# color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
+color_list = ['#002c53', '#9c403d', '#8983BF', '#58B272', '#f28522', '#009ade', '#ff1f5b']
+
 marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 
-# algorithm_list = ["Nearest", "Modify-Assignment", "RA-UA"]
-algorithm_list = ["Nearest", "M-Greedy", "SP-Max-First", "Ours"]
+# algorithm_list = ["Nearest", "M-Greedy", "SP-Max-First", "Ours"]
+algorithm_list = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "SP-Max-First", "Ours"]    # simulation name
+algorithm_in_fig = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
 
 
 # 获取一组实验的json文件的路径
@@ -188,9 +192,7 @@ def draw_max_delay(max_delays):
     plt.grid(linestyle='--')
     plt.tight_layout()
 
-    # algs = ["Random", "Nearest", "Greedy", "RL"]
-    # algs = ["Random", "Nearest", "Greedy", "RL(train40-50)", "RL(train50-60)", "SL(train40-70)", "SL(train60-70)", "A3C+GCN"]
-    algs = ["Nearest", "M-Greedy", "Max-First", "Ours"]
+    algs = algorithm_in_fig
 
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
     plt.xticks(ticks=x)
@@ -218,7 +220,7 @@ def draw_cost(costs):
     plt.grid(linestyle='--')
     plt.tight_layout()
 
-    algs = algorithm_list
+    algs = algorithm_in_fig
 
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
     plt.xticks(ticks=x)
@@ -244,7 +246,7 @@ def draw_target_value(target_values):
     plt.grid(linestyle='--')
     plt.tight_layout()
 
-    algs = algorithm_list
+    algs = algorithm_in_fig
 
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
     plt.xticks(ticks=x)
@@ -272,7 +274,7 @@ def draw_running_time(times):
 
     # algs = ["Random", "Nearest", "Greedy", "RL"]
     # algs = ["Random", "Nearest", "Greedy", "RL(train40-50)", "RL(train50-60)", "SL(train40-70)", "SL(train60-70)", "A3C+GCN"]
-    algs = ["Nearest", "M-Greedy", "Max-First", "Ours"]
+    algs = algorithm_in_fig
 
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
     plt.xticks(ticks=x)
@@ -292,7 +294,7 @@ def draw_running_time(times):
     plt.show()
 
 def draw_figures_shared_legend(max_delays, avg_costs, target_values):
-    algs = ["Nearest", "M-Greedy", "Max-First", "Ours"]
+    algs = algorithm_in_fig
     fig = plt.figure()
 
     # ------------------------- target value ---------------------------
@@ -345,7 +347,7 @@ def draw_figures_shared_legend(max_delays, avg_costs, target_values):
     plt.show()
 
 def draw_figures(max_delays, avg_costs, target_values):
-    algs = ["Nearest", "M-Greedy", "Max-First", "Ours"]
+    algs = algorithm_in_fig
 
     # ------------------------- target value ---------------------------
     plt.subplot(1, 3, 1)
@@ -403,7 +405,7 @@ def draw_figures(max_delays, avg_costs, target_values):
 
 
 if __name__ == '__main__':
-    raw_data_path = "min_max/11-05_eta0.5_min-max-v2"
+    raw_data_path = "min_max/11-07_eta0.5_min-max-7algs"
 
     max_delay, cost, target_value, running_time = process_data(raw_data_path)
     # draw_target_value(target_value)

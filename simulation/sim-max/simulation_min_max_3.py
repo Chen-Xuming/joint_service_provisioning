@@ -16,12 +16,12 @@ import os
 if not os.path.exists(res_dir):
     os.makedirs(res_dir)
 
-print("res_dir = {}".format(res_dir))
+print("target direction: {}".format(res_dir))
 
 env_seed = 99497
 
-simulation_no = 0  # 文件号
-print("simulation_no = {}".format(simulation_no))
+simulation_no = 4  # 文件号
+print("simulation num: {}".format(simulation_no))
 
 # 用户数及测试次数
 user_range = (40, 100)
