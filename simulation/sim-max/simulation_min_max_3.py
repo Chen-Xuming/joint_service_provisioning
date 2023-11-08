@@ -7,11 +7,12 @@ from min_max.stp_max_first import StpMaxFirst
 from min_max.min_max_ours_v2 import MinMaxOurs_V2
 from min_max.MGreedy import MGreedyAlgorithm
 from min_max.min_avg_for_min_max import MinAvgForMinMax
+from min_max.surrogate import MinMaxSurrogate
 from configuration.config import config as conf
 
 """ 创建文件夹 """
-description = "min-max-7algs"        # fixme
-res_dir = "../../result/min_max/11-07_eta{}_{}".format(conf["eta"], description)
+description = "min-max-surrogate"        # fixme
+res_dir = "../../result/min_max/11-08_eta{}_{}".format(conf["eta"], description)
 import os
 if not os.path.exists(res_dir):
     os.makedirs(res_dir)
@@ -20,18 +21,20 @@ print("target direction: {}".format(res_dir))
 
 env_seed = 99497
 
-simulation_no = 4  # 文件号
+simulation_no = 5  # 文件号
 print("simulation num: {}".format(simulation_no))
 
 # 用户数及测试次数
 user_range = (40, 100)
 user_range_step = 10
-simulation_times_each_num_user = 10
+simulation_times_each_num_user = 3
 
 # algorithms = ["Nearest", "Modify-Assignment", "M-Greedy", "Shortest-Path", "Shortest-Path-V2"]
 
 # algorithms = ["Nearest", "M-Greedy", "SP-Max-First", "Ours"]
-algorithms = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "SP-Max-First", "Ours"]
+# algorithms = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "SP-Max-First", "Ours"]
+
+algorithms = ["Nearest", "Surrogate", "SP-Max-First"]
 
 do_RA = True
 stable_only = False
@@ -166,6 +169,19 @@ for num_user in range(user_range[0], user_range[1] + user_range_step, user_range
                 res_running_time[j].append(our_alg.running_time)
                 res_local_count[j].append(our_alg.local_count)
                 res_common_count[j].append(our_alg.common_count)
+
+            if alg_name == "Surrogate":
+                env = Environment(conf, env_seed)
+                env.reset(num_user=num_user, user_seed=user_seed)
+                surrogate_alg = MinMaxSurrogate(env, do_RA=True, stable_only=False)
+
+                surrogate_alg.run()
+                res_max_delay[j].append(surrogate_alg.max_delay)
+                res_cost[j].append(surrogate_alg.final_avg_cost)
+                res_target_value[j].append(surrogate_alg.target_value)
+                res_running_time[j].append(surrogate_alg.running_time)
+                res_local_count[j].append(surrogate_alg.local_count)
+                res_common_count[j].append(surrogate_alg.common_count)
 
         print("---------------------")
         print("num_user = {}, simulation #{}".format(num_user, i))

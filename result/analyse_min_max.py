@@ -405,13 +405,13 @@ def draw_figures(max_delays, avg_costs, target_values):
 
 
 if __name__ == '__main__':
-    raw_data_path = "min_max/11-07_eta0.5_min-max-7algs"
+    raw_data_path = "min_max/11-07_eta0_min-max-7algs"
 
     max_delay, cost, target_value, running_time = process_data(raw_data_path)
     # draw_target_value(target_value)
-    # draw_max_delay(max_delay)
+    draw_max_delay(max_delay)
     # draw_cost(cost)
     draw_running_time(running_time)
 
     # draw_figures(avg_delay, cost, target_value)
-    draw_figures_shared_legend(max_delay, cost, target_value)
+    # draw_figures_shared_legend(max_delay, cost, target_value)
