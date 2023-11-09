@@ -331,7 +331,7 @@ class MinAvgForMinMax(BaseMinMaxAlgorithm):
             print(info)
 
 if __name__ == "__main__":
-    from env.environment import Environment
+    from env.environment_old import Environment
     import random
     from configuration.config import config as conf
 

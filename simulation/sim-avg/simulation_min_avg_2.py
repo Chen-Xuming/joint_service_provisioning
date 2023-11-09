@@ -1,6 +1,6 @@
 import copy
 
-from env.environment import Environment
+from env.environment_old import Environment
 from numpy.random import default_rng
 import random
 from min_avg.nearest import NearestAlgorithm

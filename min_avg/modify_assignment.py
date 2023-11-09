@@ -206,7 +206,7 @@ class ModifyAssignmentAlgorithm(BaseMinAvgAlgorithm):
 
 
 if __name__ == "__main__":
-    from env.environment import Environment
+    from env.environment_old import Environment
     from configuration.config import config as conf
     from min_avg.nearest import NearestAlgorithm
     import random

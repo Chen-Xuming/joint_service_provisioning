@@ -160,7 +160,7 @@ class MinMaxOurs_V2(BaseMinMaxAlgorithm):
 
             """ 5. Update Sub-gradient """
             alpha_k = self.alpha / k
-            alpha_k = max(alpha_k, self.alpha / 20)         # fixme
+            alpha_k = max(alpha_k, self.alpha / 30)         # fixme
             self.DEBUG("alpha_k = {}".format(alpha_k))
             for i in range(self.env.user_num):
                 for j in range(self.env.user_num):
@@ -586,7 +586,7 @@ class MinMaxOurs_V2(BaseMinMaxAlgorithm):
             print(info)
 
 if __name__ == "__main__":
-    from env.environment import Environment
+    from env.environment_old import Environment
     import random
     from configuration.config import config as conf
     from min_max.nearest import NearestAlgorithm

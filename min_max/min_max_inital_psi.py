@@ -163,20 +163,20 @@ class MinMaxSurrogate(BaseMinMaxAlgorithm):
             self.DEBUG("cur-f / best-f = {:.4f} / {:.4f}".format(current_f, f_best))
             self.DEBUG("cur-g / best-g = {:.4f} / {:.4f}".format(current_g, g_best))
 
-            """ 5. Update Psi Matrix """
-            self.update_psi_matrix()
+            # """ 5. Update Psi Matrix """
+            # self.update_psi_matrix()
 
-            # """ 5. Update Sub-gradient """
-            # alpha_k = self.alpha / k
-            # alpha_k = max(alpha_k, self.alpha / 20)         # fixme
-            # self.DEBUG("alpha_k = {}".format(alpha_k))
-            # for i in range(self.env.user_num):
-            #     for j in range(self.env.user_num):
-            #         self.psi_arr[i][j] += alpha_k * self.T_matrix[i][j]
-            #
-            # """ 6. Projection """
-            # self.projection()
-            # self.check_psi_satisfy_constraint()
+            """ 5. Update Sub-gradient """
+            alpha_k = self.alpha / k
+            alpha_k = max(alpha_k, self.alpha / 20)         # fixme
+            self.DEBUG("alpha_k = {}".format(alpha_k))
+            for i in range(self.env.user_num):
+                for j in range(self.env.user_num):
+                    self.psi_arr[i][j] += alpha_k * self.T_matrix[i][j]
+
+            """ 6. Projection """
+            self.projection()
+            self.check_psi_satisfy_constraint()
 
             if k == self.max_iteration:
                 break
@@ -195,23 +195,29 @@ class MinMaxSurrogate(BaseMinMaxAlgorithm):
         self.resource_allocation(set(), set(), self.all_user_set, self.all_user_set)
 
         self.set_edge_weight(self.all_user_set, self.all_user_set)
+        # self.set_edge_weight_for_only_t(self.all_user_set, self.all_user_set)
         self.get_all_stp_max_heap(self.all_user_set, self.all_user_set)
 
         # 获取交互时延最大的用户对，把它们加入到集合中
-        user_pair, max_stp_len = self.shortest_path_lengths.peekitem()
-        max_stp_len = -max_stp_len
-        user_i = int(user_pair[0][2:])
-        user_j = int(user_pair[1][2:])
-        user_pair = (user_i, user_j)
-        self.important_user_pairs.append(user_pair)
-
-        self.DEBUG("max-stp: {}, len = {}".format(user_pair, max_stp_len))
+        max_n = self.n_2 // 2
+        total_len = 0
+        user_pairs = []
+        lens = []
+        for _ in range(max_n):
+            user_pair, max_stp_len = self.shortest_path_lengths.peekitem()
+            max_stp_len = -max_stp_len
+            user_i = int(user_pair[0][2:])
+            user_j = int(user_pair[1][2:])
+            user_pair = (user_i, user_j)
+            total_len += max_stp_len
+            user_pairs.append(user_pair)
+            lens.append(max_stp_len)
+            self.shortest_path_lengths.popitem()
 
         # 修改权重矩阵
-        size = len(self.important_user_pairs)
-        weight = 1 / size
-        for pair in self.important_user_pairs:
-            self.psi_arr[pair[0]][pair[1]] = weight
+        for idx in range(max_n):
+            up = user_pairs[idx]
+            self.psi_arr[up[0]][up[1]] = lens[idx] / total_len
 
         # 重置数据结构
         self.graph = None
@@ -394,6 +400,32 @@ class MinMaxSurrogate(BaseMinMaxAlgorithm):
                     site_node_name = "s3{}".format(k)
                     self.graph.remove_edge(site_node_name, user_cpi_node_name)
                     # self.reversed_graph.remove_edge(user_cpi_node_name, site_node_name)
+
+    def set_edge_weight_for_only_t(self, c1: set, c1_pi: set):
+        for user_c in c1:
+            for site_s in range(self.env.site_num):
+                site = self.env.sites[site_s]
+                weight = 0
+                weight += self.env.tx_user_node[user_c][site_s] * self.env.data_size[0]
+                weight += 1 / site.service_rate_a * 1000        # ms
+                weight += self.env.users[user_c].service_a.queuing_delay * 1000
+                self.graph["u1{}".format(user_c)]["s2{}".format(site_s)]['weight'] = weight
+
+        for s in range(self.env.site_num):
+            for spi in range(self.env.site_num):
+                weight = self.env.tx_node_node[s][spi] * self.env.data_size[1]
+                self.graph["s2{}".format(s)]["s3{}".format(spi)]['weight'] = weight
+
+        for site_spi in range(self.env.site_num):
+            site = self.env.sites[site_spi]
+            for user_cpi in c1_pi:
+                weight = 0
+                weight += self.env.tx_node_user[site_spi][user_cpi] * self.env.data_size[2]
+                weight += 1 / site.service_rate_r * 1000        # ms
+                weight += self.env.users[user_cpi].service_r.queuing_delay * 1000
+                self.graph["s3{}".format(site_spi)]["u4{}".format(user_cpi)]['weight'] = weight
+
+        self.reversed_graph = nx.reverse(self.graph, copy=True)
 
     def set_edge_weight(self, c1: set, c1_pi: set):
         for user_c in c1:
@@ -686,7 +718,7 @@ class MinMaxSurrogate(BaseMinMaxAlgorithm):
             print(info)
 
 if __name__ == "__main__":
-    from env.environment2 import Environment
+    from env.environment_old import Environment
     import random
     from configuration.config import config as conf
     from min_max.nearest import NearestAlgorithm
@@ -700,8 +732,8 @@ if __name__ == "__main__":
     print("================================================================")
 
     # seed = random.randint(0, 100000)
-    # env_seed = 58972            # seed = 999734539, user_num = 30 曲线好看。
-    env_seed = 99497
+    env_seed = 58972            # seed = 999734539, user_num = 30 曲线好看。
+    # env_seed = 99497
 
     print("env_seed: ", env_seed)
 
@@ -765,6 +797,7 @@ if __name__ == "__main__":
         env.reset(num_user=num_user, user_seed=u_seed)
         surrogate_alg = MinMaxSurrogate(env)
         surrogate_alg.debug_flag = True
+        surrogate_alg.alpha = 5e-5
 
         surrogate_alg.run()
         print(surrogate_alg.get_results())

@@ -19,8 +19,12 @@ color_list = ['#002c53', '#9c403d', '#8983BF', '#58B272', '#f28522', '#009ade', 
 marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 
 # algorithm_list = ["Nearest", "M-Greedy", "SP-Max-First", "Ours"]
-algorithm_list = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "SP-Max-First", "Ours"]    # simulation name
-algorithm_in_fig = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
+# algorithm_list = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "SP-Max-First", "Ours"]    # simulation name
+# algorithm_in_fig = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
+
+algorithm_list = ["Nearest", "Surrogate", "SP-Max-First"]
+algorithm_in_fig = ["Nearest", "Surrogate", "Max-First"]
+
 
 
 # 获取一组实验的json文件的路径
@@ -405,7 +409,7 @@ def draw_figures(max_delays, avg_costs, target_values):
 
 
 if __name__ == '__main__':
-    raw_data_path = "min_max/11-07_eta0_min-max-7algs"
+    raw_data_path = "min_max/11-"
 
     max_delay, cost, target_value, running_time = process_data(raw_data_path)
     # draw_target_value(target_value)

@@ -30,6 +30,8 @@ class StpMaxFirst(BaseMinMaxAlgorithm):
         self.best_x_serviceA = np.zeros((self.env.user_num, self.env.site_num))  # 存储每个服务卸载到各个站点，性价比最大时对应服务器个数
         self.best_x_serviceR = np.zeros((self.env.user_num, self.env.site_num))
 
+        self.f_values = []
+
         self.debug_flag = False
 
     def run(self):
@@ -200,6 +202,7 @@ class StpMaxFirst(BaseMinMaxAlgorithm):
             count_running_loop += 1
             node_i, node_j, max_stp, max_len = self.get_max_stp(service_a_finished_flag, service_r_finished_flag)
 
+            self.f_values.append(max_len)
             self.DEBUG("[max-stp-len = {}] ({}, {}): {}".format(max_len, node_i, node_j, max_stp))
 
             user_i = self.env.users[int(node_i[2:])]
@@ -295,16 +298,34 @@ class StpMaxFirst(BaseMinMaxAlgorithm):
 
         return user_pair[0], user_pair[1], target_stp, max_stp_len
 
+    def draw_f_values(self):
+        import matplotlib.pyplot as plt
+        plt.xlabel("Iteration")
+        plt.ylabel("Max Distance")
+        plt.grid(linestyle='--')
+
+        min_y = int(min(self.f_values)) - 5
+        max_y = int(max(self.f_values)) + 5
+        y = [i for i in range(min_y, max_y + 5, 5)]
+        plt.yticks(y)
+
+        x = [i+1 for i in range(len(self.f_values))]
+        plt.plot(x, self.f_values, marker='.', color='blue')
+
+        plt.axhline(y=self.target_value, color='red', linestyle='--')
+
+        plt.show()
+
     def DEBUG(self, info: str):
         if self.debug_flag:
             print(info)
 
 if __name__ == "__main__":
-    from env.environment import Environment
+    from env.environment2 import Environment
     import random
     from configuration.config import config as conf
     from min_max.nearest import NearestAlgorithm
-    from min_max.min_max_ours import MinMaxOurs
+    from min_max.min_max_ours_v2 import MinMaxOurs_V2 as MinMaxOurs
     from min_max.MGreedy import MGreedyAlgorithm
 
     print("==================== env  config ===============================")
@@ -312,12 +333,13 @@ if __name__ == "__main__":
     print("================================================================")
 
     # seed = random.randint(0, 100000)
-    # env_seed = 58972            # seed = 999734539, user_num = 30 曲线好看。
+    # env_seed = 58972
     env_seed = 99497
+    # env_seed = 12345
 
     print("env_seed: ", env_seed)
 
-    num_user = 90
+    num_user = 40
 
     def draw_fg(f_arr, g_arr):
         from matplotlib import pyplot as plt
@@ -339,7 +361,8 @@ if __name__ == "__main__":
     for i in range(1):
         print("========================= iteration {} ============================".format(i + 1))
         u_seed = random.randint(0, 10000000000)
-        # u_seed = 282344064
+        # u_seed = 2101145651
+
         print("user_seed = {}".format(u_seed))
 
         print("------------- Nearest ------------------------")
@@ -353,29 +376,39 @@ if __name__ == "__main__":
         env = Environment(conf, env_seed)
         env.reset(num_user=num_user, user_seed=u_seed)
         max_first_alg = StpMaxFirst(env, consider_cost_tq=True, stable_only=False)
+        # max_first_alg.debug_flag = True
         max_first_alg.run()
         print(max_first_alg.get_results())
+        # max_first_alg.draw_f_values()
 
-        print("------------- MGreedy ------------------------")
-        env = Environment(conf, env_seed)
-        env.reset(num_user=num_user, user_seed=u_seed)
-        mg_alg = MGreedyAlgorithm(env, consider_cost_tq=True, stable_only=False)
-        mg_alg.run()
-        print(mg_alg.get_results())
-
+        # print("------------- MGreedy ------------------------")
+        # env = Environment(conf, env_seed)
+        # env.reset(num_user=num_user, user_seed=u_seed)
+        # mg_alg = MGreedyAlgorithm(env, consider_cost_tq=True, stable_only=False)
+        # mg_alg.run()
+        # print(mg_alg.get_results())
+        #
         print("------------- Ours ------------------------")
         env = Environment(conf, env_seed)
         env.reset(num_user=num_user, user_seed=u_seed)
         our_alg = MinMaxOurs(env)
         our_alg.debug_flag = True
-        if num_user <= 70:
-            our_alg.alpha = 5e-5
-        else:
-            our_alg.alpha = 1e-5
+        if num_user < 70:
+            # our_alg.alpha = 5e-5
+            our_alg.alpha = 3e-5
+            # our_alg.alpha = 5e-6
+
+        elif 70 <= num_user <= 80:
+            # our_alg.alpha = 2e-5
+            # our_alg.alpha = 1e-5
+            our_alg.alpha = 5e-6
+        elif num_user > 80:
+            # our_alg.alpha = 1e-5
+            our_alg.alpha = 3e-6
+
         our_alg.epsilon = 15
         our_alg.run()
         print(our_alg.get_results())
         print("[iterations = {}, best_iteration = {}]".format(our_alg.total_iterations, our_alg.best_iteration))
-
         draw_fg(our_alg.f_values, our_alg.g_values)
 

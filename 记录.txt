@@ -1,8 +1,70 @@
-papers:
-1. min avg
-(1) Optimizing Client Assignment for Enhancing Interactivity in Distributed Interactive Applications
-    algorithm: Modify-Assignment
+min-max 初步实验记录
 
-2. min max
-(1) The Server Provisioning Problem for Continuous Distributed Interactive Applications
-    algorithm: M-Greedy
+env_seed = 99497
+site_seed = 12345678
+
+eta = 0
+max-iter = 50
+✔
+---------------------------------------------
+num_user        alpha           epsilon         good / bad         other
+40              3e-5            15              和Max-First相似
+50              3e-5            15              和Max-First相似
+60              3e-5            15              和Max-First相似
+70              2e-5            15              和Max-First相似
+80              2e-5            15              和Max-First相似
+90              1e-5            15              稍差
+100             1e-5            15              稍差
+
+
+eta = 0.25
+max-iter = 50
+✔
+---------------------------------------------
+num_user        alpha           epsilon         good / bad         other
+40              3e-5            15              good
+50              3e-5            15              good
+60              3e-5            15              good
+70              2e-5            15              good
+80              2e-5            15              good
+90              1e-5            15              good
+100             1e-5            15              good
+
+eta = 0.5
+max-iter = 50
+✔
+---------------------------------------------
+num_user        alpha           epsilon         good / bad         other
+40              1e-5            15              good
+50              1e-5            15              good
+60              1e-5            15              稍好
+70            * 5e-6 *          15              稍好
+80            * 5e-6 *          15              稍好
+90            * 3e-6 *          15              good
+100           * 3e-6 *          15              good
+
+eta = 0.75
+max-iter = 50
+✔
+---------------------------------------------
+num_user        alpha           epsilon         good / bad         other
+40            * 5e-6 *          15              good
+50            * 5e-6 *          15              good
+60            * 5e-6 *          15              good
+70            * 3e-6 *          15              good
+80            * 3e-6 *          15              good
+90            * 1e-6 *          15              good
+100           * 1e-6 *          15              good
+
+eta = 1.0
+max-iter = 50
+✔
+---------------------------------------------
+num_user        alpha           epsilon         good / bad         other
+40            * 5e-6 *          15              good
+50            * 5e-6 *          15              good
+60            * 5e-6 *          15              good
+70            * 3e-6 *          15              good
+80            * 3e-6 *          15              good
+90            * 1e-6 *          15              good
+100           * 1e-6 *          15              good

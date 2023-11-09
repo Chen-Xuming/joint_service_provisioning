@@ -1,3 +1,7 @@
+"""
+    注意：这个版本已经废弃，对应的新版本是 ”min_avg_ours_v2.py"
+"""
+
 from min_avg.base import BaseMinAvgAlgorithm
 from env.site_node import SiteNode
 from env.user_node import UserNode
@@ -333,7 +337,7 @@ class MinAvgOurs(BaseMinAvgAlgorithm):
             print(info)
 
 if __name__ == "__main__":
-    from env.environment import Environment
+    from env.environment_old import Environment
     import random
     from configuration.config import config as conf
 
