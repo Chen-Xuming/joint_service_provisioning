@@ -17,7 +17,7 @@ from min_max.stp_max_first import StpMaxFirst
 from min_max.min_max_ours_v2 import MinMaxOurs_V2
 from min_max.MGreedy import MGreedyAlgorithm
 from min_max.surrogate import MinMaxSurrogate
-
+from min_max.min_avg_for_min_max import MinAvgForMinMax
 from configuration.config import config as conf
 from configuration.config import alpha_initial_values as alpha_list
 
@@ -25,7 +25,7 @@ print("Script started at {}.".format(datetime.now()))
 
 """ 创建文件夹 """
 description = "min-max-new_site_attr"        # fixme
-res_dir = "../../result/min_max/11-09_eta{}_{}".format(conf["eta"], description)
+res_dir = "../../result/min_max/11-10_eta{}_{}".format(conf["eta"], description)
 if not os.path.exists(res_dir):
     os.makedirs(res_dir)
 
@@ -33,17 +33,17 @@ print("res_dir = {}".format(res_dir))
 
 env_seed = 99497
 
-simulation_no = 1  # 文件号
+simulation_no = 4  # 文件号
 print("simulation_no = {}".format(simulation_no))
 
 # 用户数及测试次数
-user_range = (40, 50)
+user_range = (40, 100)
 user_range_step = 10
-simulation_times_each_num_user = 2
+simulation_times_each_num_user = 10
 
 # algorithms = ["Nearest", "Modify-Assignment", "M-Greedy", "Shortest-Path", "Shortest-Path-V2"]
 
-algorithms = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Max-First", "Ours"]
+algorithms = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
 # algorithms = ["Nearest", "M-Greedy(No Limitation)", "Max-First"]
 
 do_RA = True
@@ -116,6 +116,13 @@ for num_user in range(user_range[0], user_range[1] + user_range_step, user_range
                 mg_alg = MGreedyAlgorithm(env)
                 mg_alg.run()
                 save_result_to_dict(num_user, sim_id_str, alg_name, mg_alg)
+
+            elif alg_name == "Min-Avg":
+                env = Environment(conf, env_seed)
+                env.reset(num_user=num_user, user_seed=user_seed)
+                min_avg_alg = MinAvgForMinMax(env)
+                min_avg_alg.run()
+                save_result_to_dict(num_user, sim_id_str, alg_name, min_avg_alg)
 
             elif alg_name == "Max-First":
                 env = Environment(conf, env_seed)

@@ -409,7 +409,7 @@ def draw_figures(max_delays, avg_costs, target_values):
 
 
 if __name__ == '__main__':
-    raw_data_path = "min_max/11-"
+    raw_data_path = "min_max/11-08_eta0.5_min-max-surrogate"
 
     max_delay, cost, target_value, running_time = process_data(raw_data_path)
     # draw_target_value(target_value)

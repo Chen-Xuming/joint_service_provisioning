@@ -36,54 +36,7 @@ config = {
     "minmax_price_A_edge": (12, 18),                  # (2, 4)
     "minmax_price_R_edge": (15, 25),                 # (2, 4)
 
-    # "minmax_arrival_rate": (2, 6),
-    # "trigger_probability": 1.0,         # 无用
-    # "minmax_service_rate_A_common": (50, 80),
-    # "minmax_service_rate_R_common": (40, 60),
-    # "minmax_price_A_common": (3, 10),                # (1, 2)
-    # "minmax_price_R_common": (5, 15),                # (1, 2)
-    # "minmax_service_rate_A_edge": (30, 50),
-    # "minmax_service_rate_R_edge": (20, 35),
-    # "minmax_price_A_edge": (6, 12),                  # (2, 4)
-    # "minmax_price_R_edge": (10, 20),                 # (2, 4)
-
-    # edge-common 价格范围相同
-    # "minmax_arrival_rate": (2, 6),
-    # "trigger_probability": 0.9,
-    # "minmax_service_rate_A_common": (50, 80),
-    # "minmax_service_rate_R_common": (40, 60),
-    # "minmax_price_A_common": (3, 6),                # (1, 2)
-    # "minmax_price_R_common": (5, 8),                # (1, 2)
-    # "minmax_service_rate_A_edge": (30, 50),
-    # "minmax_service_rate_R_edge": (20, 35),
-    # "minmax_price_A_edge": (3, 6),                  # (2, 4)
-    # "minmax_price_R_edge": (5, 8),                  # (2, 4)
-
-    # edge-common 服务率范围相同
-    # "minmax_arrival_rate": (2, 6),
-    # "trigger_probability": 0.9,
-    # "minmax_service_rate_A_common": (50, 80),
-    # "minmax_service_rate_R_common": (40, 60),
-    # "minmax_price_A_common": (3, 6),                # (1, 2)
-    # "minmax_price_R_common": (5, 8),                # (1, 2)
-    # "minmax_service_rate_A_edge": (50, 80),
-    # "minmax_service_rate_R_edge": (40, 60),
-    # "minmax_price_A_edge": (5, 8),                  # (2, 4)
-    # "minmax_price_R_edge": (9, 14),                  # (2, 4)
-
-    # 所有节点完全同构（价格和服务率相同）
-    # "minmax_arrival_rate": (2, 6),
-    # "trigger_probability": 0.9,
-    # "minmax_service_rate_A_common": (60, 60),
-    # "minmax_service_rate_R_common": (40, 40),
-    # "minmax_price_A_common": (3, 3),                # (1, 2)
-    # "minmax_price_R_common": (5, 5),                # (1, 2)
-    # "minmax_service_rate_A_edge": (60, 60),
-    # "minmax_service_rate_R_edge": (40, 40),
-    # "minmax_price_A_edge": (3, 3),                  # (2, 4)
-    # "minmax_price_R_edge": (5, 5),                  # (2, 4)
-
-    "eta": 0.25,
+    "eta": 1.0,
 }
 
 """ alpha 初始参考值 """

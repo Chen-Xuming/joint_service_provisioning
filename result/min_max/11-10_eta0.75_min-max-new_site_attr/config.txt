@@ -1,0 +1,75 @@
+Simulation Description: min-max-new_site_attr
+{
+    "common_area_site_num": 20,
+    "edge_area_site_num": 2,
+    "edge_area_num": 10,
+    "global_radius": 20,
+    "edge_radius": 2,
+    "global_min_distance": 4,
+    "tx_edge_common_range": [
+        6,
+        10
+    ],
+    "tx_edge_edge_range": [
+        2,
+        5
+    ],
+    "tx_user_edge_range": [
+        1,
+        3
+    ],
+    "show_graph": false,
+    "data_size": [
+        2,
+        1,
+        3
+    ],
+    "minmax_arrival_rate": [
+        2,
+        6
+    ],
+    "trigger_probability": 1.0,
+    "minmax_service_rate_A_common": [
+        50,
+        80
+    ],
+    "minmax_service_rate_R_common": [
+        40,
+        60
+    ],
+    "minmax_price_A_common": [
+        8,
+        15
+    ],
+    "minmax_price_R_common": [
+        12,
+        20
+    ],
+    "minmax_service_rate_A_edge": [
+        30,
+        50
+    ],
+    "minmax_service_rate_R_edge": [
+        20,
+        35
+    ],
+    "minmax_price_A_edge": [
+        12,
+        18
+    ],
+    "minmax_price_R_edge": [
+        15,
+        25
+    ],
+    "eta": 0.75
+}
+user_range: (40, 100)
+user_range_step: 10
+algorithms: 
+	Nearest
+	M-Greedy(4)
+	M-Greedy(8)
+	M-Greedy(No Limitation)
+	Min-Avg
+	Max-First
+	Ours

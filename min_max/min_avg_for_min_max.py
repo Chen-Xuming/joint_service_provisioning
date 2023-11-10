@@ -38,6 +38,11 @@ class MinAvgForMinMax(BaseMinMaxAlgorithm):
         self.assign_user_time = 0
         self.allocation_time = 0
 
+        # 以下值仅用于debug
+        self.max_delay_arr = []
+        self.avg_cost_arr = []
+        self.f_arr = []
+
     def run(self):
         self.start_time = time()
 
@@ -300,6 +305,9 @@ class MinAvgForMinMax(BaseMinMaxAlgorithm):
             modify_stp_end = time()
             modify_stp_time += modify_stp_end - modify_stp_start
 
+            if self.debug_flag:
+                self.record_values_for_debug(service_a_finished_flag, service_r_finished_flag)
+
         end = time()
         self.assign_user_time = end - start
         self.DEBUG("[assign_user] running in loop: {}".format(count_running_loop))
@@ -330,31 +338,63 @@ class MinAvgForMinMax(BaseMinMaxAlgorithm):
         if self.debug_flag:
             print(info)
 
-if __name__ == "__main__":
-    from env.environment_old import Environment
-    import random
-    from configuration.config import config as conf
+    def record_values_for_debug(self, a_flags, r_flags):
+        # 计算 max_delay
+        max_delay = -1
+        for ia, fa in enumerate(a_flags):
+            if not fa:
+                continue
+            user_from = self.env.users[ia]  # type: UserNode
+            for ir, fr in enumerate(r_flags):
+                if not fr:
+                    continue
+                user_to = self.env.users[ir]  # type: UserNode
 
-    print("==================== env  config ===============================")
-    print(conf)
-    print("================================================================")
+                delay = self.env.compute_interactive_delay(user_from, user_to)
+                if delay > max_delay:
+                    max_delay = delay
+        max_delay = max_delay * 1000
+        self.max_delay_arr.append(max_delay)
 
-    # seed = random.randint(0, 100000)
-    env_seed = 58972
-    print("env_seed: ", env_seed)
+        # 计算 avg_cost
+        total_cost = 0
+        count = 0
+        for ia, fa in enumerate(a_flags):
+            if fa:
+                user_from = self.env.users[ia]  # type: UserNode
+                count += 1
+                total_cost += user_from.service_a.num_server * user_from.service_a.price
+        for ir, fr in enumerate(r_flags):
+            if fr:
+                user_to = self.env.users[ir]  # type: UserNode
+                count += 1
+                total_cost += user_to.service_r.num_server * user_to.service_r.price
 
-    num_user = 100
+        avg_cost = total_cost / count
+        self.avg_cost_arr.append(avg_cost)
 
-    for i in range(1):
-        print("========================= iteration {} ============================".format(i + 1))
-        # u_seed = random.randint(0, 10000000000)
-        u_seed = 132049593
-        print("user_seed = {}".format(u_seed))
+        f = max_delay + self.env.eta * avg_cost
+        self.f_arr.append(f)
 
-        print("------------- shortest-path-opt ------------------------")
-        env = Environment(conf, env_seed)
-        env.reset(num_user=num_user, user_seed=u_seed)
-        our_alg = MinAvgOurs(env, consider_cost_tq=True, stable_only=False)
-        our_alg.run()
-        print(our_alg.get_results())
+    def draw(self, target: str):
+        import matplotlib.pyplot as plt
+        plt.figure()
+        plt.xlabel("Iteration")
+        plt.ylabel(target)
+        iters = len(self.f_arr)
+        x = [i+1 for i in range(iters)]
+        if target == "Max Latency":
+            plt.plot(x, self.max_delay_arr, color='#58B272', marker='.')
+        if target == "Average Cost":
+            plt.plot(x, self.avg_cost_arr, color='#58B272', marker='.')
+        if target == "F Value":
+            plt.plot(x, self.f_arr, color='#58B272', marker='.')
+        if target == "All":
+            plt.ylabel("Values")
+            plt.plot(x, self.max_delay_arr, color='green', marker='.', label="Max Latency")
+            plt.plot(x, self.avg_cost_arr, color='blue', marker='.', label="Average Cost")
+            plt.plot(x, self.f_arr, color='red', marker='.', label="F Value")
+        leg = plt.legend()
+        leg.set_draggable(state=True)
+        plt.show()
 

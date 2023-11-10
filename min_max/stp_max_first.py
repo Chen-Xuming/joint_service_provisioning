@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from min_max.base import BaseMinMaxAlgorithm
 from env.site_node import SiteNode
 from env.user_node import UserNode
@@ -30,7 +32,10 @@ class StpMaxFirst(BaseMinMaxAlgorithm):
         self.best_x_serviceA = np.zeros((self.env.user_num, self.env.site_num))  # 存储每个服务卸载到各个站点，性价比最大时对应服务器个数
         self.best_x_serviceR = np.zeros((self.env.user_num, self.env.site_num))
 
-        self.f_values = []
+        # 以下值仅用于 debug
+        self.max_delay_arr = []
+        self.avg_cost_arr = []
+        self.f_arr = []
 
         self.debug_flag = False
 
@@ -63,8 +68,6 @@ class StpMaxFirst(BaseMinMaxAlgorithm):
         第四列节点是第一列的拷贝 ---> u4i, i = user_id
     """
     def build_graph(self):
-        start = time()
-
         # 添加节点
         for user in self.env.users:  # type: UserNode
             self.graph.add_node("u1{}".format(user.user_id))
@@ -144,9 +147,6 @@ class StpMaxFirst(BaseMinMaxAlgorithm):
 
         self.reversed_graph = nx.reverse(self.graph, copy=True)
 
-        end = time()
-        self.build_graph_time = end - start
-
     """
         计算一个某个服务的最佳数量
         输入：lambda_ = 到达率，miu_ = 服务率，eta，f = 服务的单价
@@ -202,7 +202,6 @@ class StpMaxFirst(BaseMinMaxAlgorithm):
             count_running_loop += 1
             node_i, node_j, max_stp, max_len = self.get_max_stp(service_a_finished_flag, service_r_finished_flag)
 
-            self.f_values.append(max_len)
             self.DEBUG("[max-stp-len = {}] ({}, {}): {}".format(max_len, node_i, node_j, max_stp))
 
             user_i = self.env.users[int(node_i[2:])]
@@ -277,6 +276,9 @@ class StpMaxFirst(BaseMinMaxAlgorithm):
                         self.shortest_path_lengths[(target_node, node_j)] = -temp_stp_lengths[target_node]
                         self.shortest_paths[target_node][node_i] = reversed(temp_stp_paths[target_node])
 
+            if self.debug_flag:
+                self.record_values_for_debug(service_a_finished_flag, service_r_finished_flag)
+
     def get_max_stp(self, service_a_finished_flag, service_r_finished_flag):
         user_pair, max_stp_len, target_stp = None, -1, None
         while len(self.shortest_path_lengths) > 0:
@@ -298,23 +300,65 @@ class StpMaxFirst(BaseMinMaxAlgorithm):
 
         return user_pair[0], user_pair[1], target_stp, max_stp_len
 
-    def draw_f_values(self):
-        import matplotlib.pyplot as plt
+    def record_values_for_debug(self, a_flags, r_flags):
+        # 计算 max_delay
+        max_delay = -1
+        for ia, fa in enumerate(a_flags):
+            if not fa:
+                continue
+            user_from = self.env.users[ia]          # type: UserNode
+            for ir, fr in enumerate(r_flags):
+                if not fr:
+                    continue
+                user_to = self.env.users[ir]        # type: UserNode
+
+                delay = self.env.compute_interactive_delay(user_from, user_to)
+                if delay > max_delay:
+                    max_delay = delay
+        max_delay = max_delay * 1000
+        self.max_delay_arr.append(max_delay)
+
+        # 计算 avg_cost
+        total_cost = 0
+        count = 0
+        for ia, fa in enumerate(a_flags):
+            if fa:
+                user_from = self.env.users[ia]          # type: UserNode
+                count += 1
+                total_cost += user_from.service_a.num_server * user_from.service_a.price
+        for ir, fr in enumerate(r_flags):
+            if fr:
+                user_to = self.env.users[ir]          # type: UserNode
+                count += 1
+                total_cost += user_to.service_r.num_server * user_to.service_r.price
+
+        avg_cost = total_cost / count
+        self.avg_cost_arr.append(avg_cost)
+
+        f = max_delay + self.env.eta * avg_cost
+        self.f_arr.append(f)
+
+    def draw(self, target: str):
+        plt.figure()
         plt.xlabel("Iteration")
-        plt.ylabel("Max Distance")
-        plt.grid(linestyle='--')
-
-        min_y = int(min(self.f_values)) - 5
-        max_y = int(max(self.f_values)) + 5
-        y = [i for i in range(min_y, max_y + 5, 5)]
-        plt.yticks(y)
-
-        x = [i+1 for i in range(len(self.f_values))]
-        plt.plot(x, self.f_values, marker='.', color='blue')
-
-        plt.axhline(y=self.target_value, color='red', linestyle='--')
-
+        plt.ylabel(target)
+        iters = len(self.f_arr)
+        x = [i+1 for i in range(iters)]
+        if target == "Max Latency":
+            plt.plot(x, self.max_delay_arr, color='#58B272', marker='.')
+        if target == "Average Cost":
+            plt.plot(x, self.avg_cost_arr, color='#58B272', marker='.')
+        if target == "F Value":
+            plt.plot(x, self.f_arr, color='#58B272', marker='.')
+        if target == "All":
+            plt.ylabel("Values")
+            plt.plot(x, self.max_delay_arr, color='green', marker='.', label="Max Latency")
+            plt.plot(x, self.avg_cost_arr, color='blue', marker='.', label="Average Cost")
+            plt.plot(x, self.f_arr, color='red', marker='.', label="F Value")
+        leg = plt.legend()
+        leg.set_draggable(state=True)
         plt.show()
+
 
     def DEBUG(self, info: str):
         if self.debug_flag:
@@ -327,6 +371,7 @@ if __name__ == "__main__":
     from min_max.nearest import NearestAlgorithm
     from min_max.min_max_ours_v2 import MinMaxOurs_V2 as MinMaxOurs
     from min_max.MGreedy import MGreedyAlgorithm
+    from min_max.min_avg_for_min_max import MinAvgForMinMax
 
     print("==================== env  config ===============================")
     print(conf)
@@ -339,7 +384,7 @@ if __name__ == "__main__":
 
     print("env_seed: ", env_seed)
 
-    num_user = 40
+    num_user = 100
 
     def draw_fg(f_arr, g_arr):
         from matplotlib import pyplot as plt
@@ -358,10 +403,32 @@ if __name__ == "__main__":
         plt.legend()
         plt.show()
 
+    def draw_for_min_and_max_first(min_first: MinAvgForMinMax, max_first: StpMaxFirst):
+        from matplotlib import pyplot as plt
+
+        fig = plt.figure()
+        plt.ylabel("Values", fontsize=20)
+        plt.xlabel("Iteration", fontsize=20)
+
+        x_min_first = [(i + 1) for i in range(len(min_first.f_arr))]
+        plt.plot(x_min_first, min_first.f_arr, label='F(min-first)', color='red', linewidth=2)
+        plt.plot(x_min_first, min_first.max_delay_arr, label='Max Latency(min-first)', color='green', linewidth=2)
+        plt.plot(x_min_first, min_first.avg_cost_arr, label='Avg Cost(min-first)', color='blue', linewidth=2)
+
+        x_max_first = [(i + 1) for i in range(len(max_first.f_arr))]
+        plt.plot(x_max_first, max_first.f_arr, label='F(max-first)', color='red', linestyle='--', linewidth=2)
+        plt.plot(x_max_first, max_first.max_delay_arr, label='Max Latency(max-first)', color='green', linestyle='--', linewidth=2)
+        plt.plot(x_max_first, max_first.avg_cost_arr, label='Avg Cost(max-first)', color='blue', linestyle='--', linewidth=2)
+
+        leg = fig.legend(fontsize=16)
+        leg.set_draggable(state=True)
+        plt.show()
+
+
     for i in range(1):
         print("========================= iteration {} ============================".format(i + 1))
-        u_seed = random.randint(0, 10000000000)
-        # u_seed = 2101145651
+        # u_seed = random.randint(0, 10000000000)
+        u_seed = 92238814
 
         print("user_seed = {}".format(u_seed))
 
@@ -376,39 +443,53 @@ if __name__ == "__main__":
         env = Environment(conf, env_seed)
         env.reset(num_user=num_user, user_seed=u_seed)
         max_first_alg = StpMaxFirst(env, consider_cost_tq=True, stable_only=False)
-        # max_first_alg.debug_flag = True
+        max_first_alg.debug_flag = True
         max_first_alg.run()
         print(max_first_alg.get_results())
-        # max_first_alg.draw_f_values()
+        # if max_first_alg.debug_flag:
+            # max_first_alg.draw("Max Latency")
+            # max_first_alg.draw("Average Cost")
+            # max_first_alg.draw("F Value")
+            # max_first_alg.draw("All")
 
-        # print("------------- MGreedy ------------------------")
-        # env = Environment(conf, env_seed)
-        # env.reset(num_user=num_user, user_seed=u_seed)
-        # mg_alg = MGreedyAlgorithm(env, consider_cost_tq=True, stable_only=False)
-        # mg_alg.run()
-        # print(mg_alg.get_results())
-        #
-        print("------------- Ours ------------------------")
+        print("------------- Min Stp First ------------------------")
         env = Environment(conf, env_seed)
         env.reset(num_user=num_user, user_seed=u_seed)
-        our_alg = MinMaxOurs(env)
-        our_alg.debug_flag = True
-        if num_user < 70:
-            # our_alg.alpha = 5e-5
-            our_alg.alpha = 3e-5
-            # our_alg.alpha = 5e-6
+        min_first_alg = MinAvgForMinMax(env, consider_cost_tq=True, stable_only=False)
+        min_first_alg.debug_flag = True
+        min_first_alg.run()
+        print(min_first_alg.get_results())
+        # if min_first_alg.debug_flag:
+            # max_first_alg.draw("Max Latency")
+            # max_first_alg.draw("Average Cost")
+            # max_first_alg.draw("F Value")
+            # min_first_alg.draw("All")
 
-        elif 70 <= num_user <= 80:
-            # our_alg.alpha = 2e-5
-            # our_alg.alpha = 1e-5
-            our_alg.alpha = 5e-6
-        elif num_user > 80:
-            # our_alg.alpha = 1e-5
-            our_alg.alpha = 3e-6
+        draw_for_min_and_max_first(max_first=max_first_alg, min_first=min_first_alg)
 
-        our_alg.epsilon = 15
-        our_alg.run()
-        print(our_alg.get_results())
-        print("[iterations = {}, best_iteration = {}]".format(our_alg.total_iterations, our_alg.best_iteration))
-        draw_fg(our_alg.f_values, our_alg.g_values)
+
+
+        # print("------------- Ours ------------------------")
+        # env = Environment(conf, env_seed)
+        # env.reset(num_user=num_user, user_seed=u_seed)
+        # our_alg = MinMaxOurs(env)
+        # our_alg.debug_flag = True
+        # if num_user < 70:
+        #     # our_alg.alpha = 5e-5
+        #     our_alg.alpha = 3e-5
+        #     # our_alg.alpha = 5e-6
+        #
+        # elif 70 <= num_user <= 80:
+        #     # our_alg.alpha = 2e-5
+        #     # our_alg.alpha = 1e-5
+        #     our_alg.alpha = 5e-6
+        # elif num_user > 80:
+        #     # our_alg.alpha = 1e-5
+        #     our_alg.alpha = 3e-6
+        #
+        # our_alg.epsilon = 15
+        # our_alg.run()
+        # print(our_alg.get_results())
+        # print("[iterations = {}, best_iteration = {}]".format(our_alg.total_iterations, our_alg.best_iteration))
+        # draw_fg(our_alg.f_values, our_alg.g_values)
 
