@@ -370,7 +370,7 @@ if __name__ == "__main__":
     from configuration.config import config as conf
     from min_max.nearest import NearestAlgorithm
     from min_max.min_max_ours_v2 import MinMaxOurs_V2 as MinMaxOurs
-    from min_max.MGreedy import MGreedyAlgorithm
+    from min_max.mgreedy import MGreedyAlgorithm
     from min_max.min_avg_for_min_max import MinAvgForMinMax
 
     print("==================== env  config ===============================")

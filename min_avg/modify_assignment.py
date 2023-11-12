@@ -39,7 +39,7 @@ class ModifyAssignmentAlgorithm(BaseMinAvgAlgorithm):
 
         self.get_running_time()
         self.get_target_value()
-        self.result_info()
+        # self.result_info()
 
         self.DEBUG("avg_delay = {}".format(self.avg_delay))
         self.DEBUG("final_cost = {}".format(self.final_avg_cost))

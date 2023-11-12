@@ -8,8 +8,8 @@ from min_avg.min_avg_ours import MinAvgOurs
 from configuration.config import config as conf
 
 """ 创建文件夹 """
-description = "ma-v2"        # fixme
-res_dir = "../../result/min_avg/10-24_eta{}_{}".format(conf["eta"], description)
+description = "new-site-params"        # fixme
+res_dir = "../../result/min_avg/11-12_eta{}_{}".format(conf["eta"], description)
 import os
 if not os.path.exists(res_dir):
     os.makedirs(res_dir)
@@ -18,12 +18,12 @@ print("res_dir = {}".format(res_dir))
 
 env_seed = 99497
 
-simulation_no = 4  # 文件号
+simulation_no = 0  # 文件号
 
 # 用户数及测试次数
 user_range = (40, 100)
 user_range_step = 10
-simulation_times_each_num_user = 10
+simulation_times_each_num_user = 17
 
 # algorithms = ["Nearest", "Modify-Assignment", "M-Greedy", "Shortest-Path", "Shortest-Path-V2"]
 # algorithms = ["Shortest-Path", "Shortest-Path-Stable-Only"]
@@ -81,7 +81,6 @@ for num_user in range(user_range[0], user_range[1] + user_range_step, user_range
                 res_local_count[j].append(nearest_alg.local_count)
                 res_common_count[j].append(nearest_alg.common_count)
 
-
             if alg_name == "Modify-Assignment":
                 env = Environment(conf, env_seed)
                 env.reset(num_user=num_user, user_seed=user_seed)
@@ -109,7 +108,6 @@ for num_user in range(user_range[0], user_range[1] + user_range_step, user_range
                 res_running_time[j].append(mdf_alg_v2.running_time)
                 res_local_count[j].append(mdf_alg_v2.local_count)
                 res_common_count[j].append(mdf_alg_v2.common_count)
-
 
             if alg_name == "RA-UA":
                 env = Environment(conf, env_seed)

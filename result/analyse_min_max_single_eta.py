@@ -18,8 +18,11 @@ color_list = ['#002c53', '#9c403d', '#8983BF', '#58B272', '#f28522', '#009ade', 
 
 marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 
-algorithm_list = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
-algorithm_in_fig = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
+# algorithm_list = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
+# algorithm_in_fig = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
+#
+algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
+algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
 
 # 获取一组实验的json文件的路径
 def get_json_file_list(dir_path):
@@ -77,7 +80,8 @@ def process_data(dir_path):
                     algo_data = sim_data[algo]
 
                     for attr, attr_val in algo_data.items():
-                        data[user_num][algo][attr].append(attr_val)
+                        if attr in data[user_num][algo].keys():
+                            data[user_num][algo][attr].append(attr_val)
 
     """ 对 data 中的每个数组求平均值 """
     for u in range(user_range[0], user_range[1] + user_step, user_step):
@@ -219,14 +223,13 @@ def draw_figures_shared_legend(data: dict):
     for idx, algo in enumerate(algorithm_in_fig):
         plt.plot(x, data[algo]["cost"], label=algo, color=color_list[idx], marker=marker_list[idx])
 
-
     lines, labels = fig.axes[-1].get_legend_handles_labels()
     leg = fig.legend(lines, labels, bbox_to_anchor=(0.74, 0.96), ncol=4, framealpha=1)
     leg.set_draggable(state=True)
     plt.show()
 
 if __name__ == '__main__':
-    raw_data_path = "min_max/11-10_eta1.0_min-max-new_site_attr"
+    raw_data_path = "min_max/11-12_eta1.0_min-max-mgreedy-v2"
     res_dict = process_data(raw_data_path)
     # print(res_dict)
 

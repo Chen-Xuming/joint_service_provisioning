@@ -143,7 +143,7 @@ class MGreedyAlgorithm(BaseMinMaxAlgorithm):
         max_delay = -math.inf
         u_pair = None
         for ui in range(self.env.user_num):
-            for uj in range(ui + 1, self.env.user_num):
+            for uj in range(self.env.user_num):
                 d1 = self.env.tx_user_node[ui][assignment[ui]] * self.env.data_size[0]
                 d2 = self.env.tx_node_node[assignment[ui]][assignment[uj]] * self.env.data_size[1]
                 d3 = self.env.tx_node_user[assignment[uj]][uj] * self.env.data_size[2]
@@ -153,10 +153,22 @@ class MGreedyAlgorithm(BaseMinMaxAlgorithm):
                     u_pair = (ui, uj)
         return max_delay, u_pair
 
-
     def check_result(self):
         for u, s in self.assignment.items():
             print("client {}(area {})---> site {}(area {})".format(u, self.env.users[u].area_id, s, self.env.sites[s].area_id))
+
+    """
+        获取最终的统计信息
+    """
+    def get_results(self):
+        self.results["max_delay"] = self.max_delay
+        self.results["cost"] = self.final_avg_cost
+        self.results["target_value"] = self.target_value
+        self.results["running_time"] = self.running_time
+        self.results["n_selected_site"] = len(self.selected_sites)
+        self.results["local_count"] = self.local_count
+        self.results["common_count"] = self.common_count
+        return self.results
 
     def DEBUG(self, info: str):
         if self.debug_flag:

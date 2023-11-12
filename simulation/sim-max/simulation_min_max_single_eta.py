@@ -15,7 +15,8 @@ from datetime import datetime
 from min_max.nearest import NearestAlgorithm
 from min_max.stp_max_first import StpMaxFirst
 from min_max.min_max_ours_v2 import MinMaxOurs_V2
-from min_max.MGreedy import MGreedyAlgorithm
+from min_max.mgreedy import MGreedyAlgorithm
+from min_max.mgreedy_v2 import MGreedyAlgorithm_V2
 from min_max.surrogate import MinMaxSurrogate
 from min_max.min_avg_for_min_max import MinAvgForMinMax
 from configuration.config import config as conf
@@ -24,8 +25,8 @@ from configuration.config import alpha_initial_values as alpha_list
 print("Script started at {}.".format(datetime.now()))
 
 """ 创建文件夹 """
-description = "min-max-new_site_attr"        # fixme
-res_dir = "../../result/min_max/11-10_eta{}_{}".format(conf["eta"], description)
+description = "min-max-mgreedy-3kinds"        # fixme
+res_dir = "../../result/min_max/11-12_eta{}_{}".format(conf["eta"], description)
 if not os.path.exists(res_dir):
     os.makedirs(res_dir)
 
@@ -33,18 +34,20 @@ print("res_dir = {}".format(res_dir))
 
 env_seed = 99497
 
-simulation_no = 4  # 文件号
+simulation_no = 0  # 文件号
 print("simulation_no = {}".format(simulation_no))
 
 # 用户数及测试次数
 user_range = (40, 100)
 user_range_step = 10
-simulation_times_each_num_user = 10
+simulation_times_each_num_user = 17
 
 # algorithms = ["Nearest", "Modify-Assignment", "M-Greedy", "Shortest-Path", "Shortest-Path-V2"]
 
-algorithms = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
-# algorithms = ["Nearest", "M-Greedy(No Limitation)", "Max-First"]
+# algorithms = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
+# algorithms = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
+algorithms = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "M-Greedy-V2(Tx+Tp+Tq)", "Min-Avg", "Max-First", "Ours"]
+
 
 do_RA = True
 stable_only = False
@@ -94,28 +97,26 @@ for num_user in range(user_range[0], user_range[1] + user_range_step, user_range
                 nearest_alg.run()
                 save_result_to_dict(num_user, sim_id_str, alg_name, nearest_alg)
 
-            elif alg_name == "M-Greedy(4)":
-                env = Environment(conf, env_seed)
-                env.reset(num_user=num_user, user_seed=user_seed)
-                mg4_alg = MGreedyAlgorithm(env)
-                mg4_alg.M = 4
-                mg4_alg.run()
-                save_result_to_dict(num_user, sim_id_str, alg_name, mg4_alg)
-
-            elif alg_name == "M-Greedy(8)":
-                env = Environment(conf, env_seed)
-                env.reset(num_user=num_user, user_seed=user_seed)
-                mg8_alg = MGreedyAlgorithm(env)
-                mg8_alg.M = 8
-                mg8_alg.run()
-                save_result_to_dict(num_user, sim_id_str, alg_name, mg8_alg)
-
-            elif alg_name == "M-Greedy(No Limitation)":
+            elif alg_name == "M-Greedy(No Limitation)" or alg_name == "M-Greedy":
                 env = Environment(conf, env_seed)
                 env.reset(num_user=num_user, user_seed=user_seed)
                 mg_alg = MGreedyAlgorithm(env)
                 mg_alg.run()
                 save_result_to_dict(num_user, sim_id_str, alg_name, mg_alg)
+
+            elif alg_name == "M-Greedy-V2(Tx+Tp)":
+                env = Environment(conf, env_seed)
+                env.reset(num_user=num_user, user_seed=user_seed)
+                mgv2_110_alg = MGreedyAlgorithm_V2(env, max_t_compositions=0b110)
+                mgv2_110_alg.run()
+                save_result_to_dict(num_user, sim_id_str, alg_name, mgv2_110_alg)
+
+            elif alg_name == "M-Greedy-V2(Tx+Tp+Tq)":
+                env = Environment(conf, env_seed)
+                env.reset(num_user=num_user, user_seed=user_seed)
+                mgv2_111_alg = MGreedyAlgorithm_V2(env, max_t_compositions=0b111)
+                mgv2_111_alg.run()
+                save_result_to_dict(num_user, sim_id_str, alg_name, mgv2_111_alg)
 
             elif alg_name == "Min-Avg":
                 env = Environment(conf, env_seed)
@@ -142,10 +143,10 @@ for num_user in range(user_range[0], user_range[1] + user_range_step, user_range
                 env = Environment(conf, env_seed)
                 env.reset(num_user=num_user, user_seed=user_seed)
                 our_alg = MinMaxOurs_V2(env)
+                our_alg.debug_flag = False
                 our_alg.alpha = alpha_list[conf["eta"]][num_user]
                 our_alg.epsilon = 15
                 our_alg.run()
-                our_alg.debug_flag = False
                 save_result_to_dict(num_user, sim_id_str, alg_name, our_alg)
 
         print("-----------------------------------")

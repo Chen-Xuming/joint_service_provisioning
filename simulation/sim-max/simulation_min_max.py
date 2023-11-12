@@ -5,7 +5,7 @@ import random
 from min_max.nearest import NearestAlgorithm
 from min_max.stp_max_first import StpMaxFirst
 from min_max.min_max_ours_v2 import MinMaxOurs_V2
-from min_max.MGreedy import MGreedyAlgorithm
+from min_max.mgreedy import MGreedyAlgorithm
 
 from configuration.config import config as conf
 

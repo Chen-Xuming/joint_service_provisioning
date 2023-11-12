@@ -162,6 +162,22 @@ class MinMaxOurs_V2(BaseMinMaxAlgorithm):
             alpha_k = self.alpha / k
             alpha_k = max(alpha_k, self.alpha / 30)         # fixme
             self.DEBUG("alpha_k = {}".format(alpha_k))
+
+            # only for debug
+            if self.debug_flag:
+                t_matrix_max = np.max(self.T_matrix)
+                t_matrix_min = np.min(self.T_matrix)
+                t_matrix_avg = np.mean(self.T_matrix)
+                psi_arr_max = np.max(self.psi_arr)
+                psi_arr_min = np.min(self.psi_arr)
+                psi_arr_avg = np.mean(self.psi_arr)
+                maxT_up = np.unravel_index(np.argmax(self.T_matrix), self.T_matrix.shape)
+                maxPsi_up = np.unravel_index(np.argmax(self.psi_arr), self.psi_arr.shape)
+                print("T-min, T-avg, T-max = {}, {}, {}".format(t_matrix_min, t_matrix_avg, t_matrix_max))
+                print("Psi-min, Psi-avg, Psi-max = {}, {}, {}".format(psi_arr_min, psi_arr_avg, psi_arr_max))
+                print("[max-user_pair] T: {}, Psi: {}".format(maxT_up, maxPsi_up))
+                print("Range of alpha * T = [{}, {}]".format(alpha_k * t_matrix_min, alpha_k * t_matrix_max))
+
             for i in range(self.env.user_num):
                 for j in range(self.env.user_num):
                     self.psi_arr[i][j] += alpha_k * self.T_matrix[i][j]
@@ -586,12 +602,13 @@ class MinMaxOurs_V2(BaseMinMaxAlgorithm):
             print(info)
 
 if __name__ == "__main__":
-    from env.environment_old import Environment
+    from env.environment2 import Environment
     import random
     from configuration.config import config as conf
+    from configuration.config import alpha_initial_values as alpha_values
     from min_max.nearest import NearestAlgorithm
     from min_max.min_max_ours import MinMaxOurs as MinMaxOurs_V1
-    from min_max.MGreedy import MGreedyAlgorithm
+    from min_max.mgreedy import MGreedyAlgorithm
     from min_max.min_avg_for_min_max import MinAvgForMinMax
     from min_max.stp_max_first import StpMaxFirst
 
@@ -605,7 +622,7 @@ if __name__ == "__main__":
 
     print("env_seed: ", env_seed)
 
-    num_user = 40
+    num_user = 50
 
     def draw_fg(f_arr, g_arr):
         from matplotlib import pyplot as plt
@@ -627,7 +644,7 @@ if __name__ == "__main__":
     for i in range(1):
         print("========================= iteration {} ============================".format(i + 1))
         u_seed = random.randint(0, 10000000000)
-        # u_seed = 7040435858
+        # u_seed = 5400793107
         print("user_seed = {}".format(u_seed))
 
         print("------------- Nearest ------------------------")
@@ -636,20 +653,21 @@ if __name__ == "__main__":
         nearest_alg = NearestAlgorithm(env)
         nearest_alg.run()
         print(nearest_alg.get_results())
-
-        print("------------- Min-Avg Algorithm ------------------------")
-        env = Environment(conf, env_seed)
-        env.reset(num_user=num_user, user_seed=u_seed)
-        min_avg_alg = MinAvgForMinMax(env, consider_cost_tq=True, stable_only=False)
-        min_avg_alg.run()
-        print(min_avg_alg.get_results())
+        #
+        # print("------------- Min-Avg Algorithm ------------------------")
+        # env = Environment(conf, env_seed)
+        # env.reset(num_user=num_user, user_seed=u_seed)
+        # min_avg_alg = MinAvgForMinMax(env, consider_cost_tq=True, stable_only=False)
+        # min_avg_alg.run()
+        # print(min_avg_alg.get_results())
         # temp_f, temp_max_delay, temp_avg_cost = min_avg_alg.env.compute_target_function_value("min-max")
         # print("f_value = {:.4f}, max_delay = {:.4f} ms, avg_cost = {:.4f}".format(temp_f, temp_max_delay * 1000, temp_avg_cost))
-
+        #
         print("------------- Max Stp First ------------------------")
         env = Environment(conf, env_seed)
         env.reset(num_user=num_user, user_seed=u_seed)
         max_first_alg = StpMaxFirst(env, consider_cost_tq=True, stable_only=False)
+        max_first_alg.debug_flag = False
         max_first_alg.run()
         print(max_first_alg.get_results())
         #
@@ -681,12 +699,8 @@ if __name__ == "__main__":
         our_alg_v2 = MinMaxOurs_V2(env)
         our_alg_v2.debug_flag = True
 
-        if num_user <= 60:
-            our_alg_v2.alpha = 5e-5
-        elif 60 < num_user <= 80:
-            our_alg_v2.alpha = 3e-5
-        elif num_user > 80:
-            our_alg_v2.alpha = 1e-5
+        our_alg_v2.alpha = alpha_values[conf["eta"]][num_user]
+        print("alpha = {}".format(our_alg_v2.alpha))
 
         our_alg_v2.epsilon = 15
         our_alg_v2.run()
