@@ -9,7 +9,7 @@ from configuration.config import config as conf
 
 """ 创建文件夹 """
 description = "new-site-params"        # fixme
-res_dir = "../../result/min_avg/11-12_eta{}_{}".format(conf["eta"], description)
+res_dir = "../../result/min_avg/11-13_eta{}_{}".format(conf["eta"], description)
 import os
 if not os.path.exists(res_dir):
     os.makedirs(res_dir)
@@ -18,12 +18,12 @@ print("res_dir = {}".format(res_dir))
 
 env_seed = 99497
 
-simulation_no = 0  # 文件号
+simulation_no = 2  # 文件号
 
 # 用户数及测试次数
 user_range = (40, 100)
 user_range_step = 10
-simulation_times_each_num_user = 17
+simulation_times_each_num_user = 15
 
 # algorithms = ["Nearest", "Modify-Assignment", "M-Greedy", "Shortest-Path", "Shortest-Path-V2"]
 # algorithms = ["Shortest-Path", "Shortest-Path-Stable-Only"]

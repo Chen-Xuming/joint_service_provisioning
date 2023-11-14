@@ -34,13 +34,13 @@ print("res_dir = {}".format(res_dir))
 
 env_seed = 99497
 
-simulation_no = 0  # 文件号
+simulation_no = 2  # 文件号
 print("simulation_no = {}".format(simulation_no))
 
 # 用户数及测试次数
 user_range = (40, 100)
 user_range_step = 10
-simulation_times_each_num_user = 17
+simulation_times_each_num_user = 15
 
 # algorithms = ["Nearest", "Modify-Assignment", "M-Greedy", "Shortest-Path", "Shortest-Path-V2"]
 

@@ -21,8 +21,9 @@ marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 # algorithm_list = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
 # algorithm_in_fig = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
 #
-algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
-algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
+
+algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "M-Greedy-V2(Tx+Tp+Tq)", "Min-Avg", "Max-First", "Ours"]
+algorithm_in_fig = ["Nearest", "M-Greedy(Tx)", "M-Greedy(Tx+Tp)", "M-Greedy(Tx+Tp+Tq)", "Min-Avg", "Max-First", "Ours"]
 
 # 获取一组实验的json文件的路径
 def get_json_file_list(dir_path):
@@ -103,7 +104,7 @@ def process_data(dir_path):
         }
     """
     final_data = {}
-    for algo in algorithm_in_fig:
+    for algo in algorithm_list:
         final_data[algo] = {
             "max_delay": [],
             "cost": [],
@@ -114,7 +115,7 @@ def process_data(dir_path):
         }
     for u, u_data in data.items():
         for algo, algo_data in u_data.items():
-            if algo in algorithm_in_fig:
+            if algo in algorithm_list:
                 for attr, attr_value in algo_data.items():
                     final_data[algo][attr].append(attr_value)
 
@@ -130,8 +131,8 @@ def draw_max_delay(data: dict):
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
     plt.xticks(ticks=x)
 
-    for idx, algo in enumerate(algorithm_in_fig):
-        plt.plot(x, data[algo]["max_delay"], label=algo, color=color_list[idx], marker=marker_list[idx])
+    for idx, algo in enumerate(algorithm_list):
+        plt.plot(x, data[algo]["max_delay"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
     leg = plt.legend(fontsize=fontsize_legend, loc='best')
     leg.set_draggable(state=True)
@@ -147,8 +148,8 @@ def draw_avg_cost(data: dict):
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
     plt.xticks(ticks=x)
 
-    for idx, algo in enumerate(algorithm_in_fig):
-        plt.plot(x, data[algo]["cost"], label=algo, color=color_list[idx], marker=marker_list[idx])
+    for idx, algo in enumerate(algorithm_list):
+        plt.plot(x, data[algo]["cost"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
     leg = plt.legend(fontsize=fontsize_legend, loc='best')
     leg.set_draggable(state=True)
@@ -164,8 +165,8 @@ def draw_target_value(data: dict):
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
     plt.xticks(ticks=x)
 
-    for idx, algo in enumerate(algorithm_in_fig):
-        plt.plot(x, data[algo]["target_value"], label=algo, color=color_list[idx], marker=marker_list[idx])
+    for idx, algo in enumerate(algorithm_list):
+        plt.plot(x, data[algo]["target_value"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
     leg = plt.legend(fontsize=fontsize_legend, loc='best')
     leg.set_draggable(state=True)
@@ -181,8 +182,8 @@ def draw_running_time(data: dict):
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
     plt.xticks(ticks=x)
 
-    for idx, algo in enumerate(algorithm_in_fig):
-        plt.plot(x, data[algo]["running_time"], label=algo, color=color_list[idx], marker=marker_list[idx])
+    for idx, algo in enumerate(algorithm_list):
+        plt.plot(x, data[algo]["running_time"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
     leg = plt.legend(fontsize=fontsize_legend, loc='best')
     leg.set_draggable(state=True)
@@ -200,8 +201,8 @@ def draw_figures_shared_legend(data: dict):
     plt.text(0.5, -0.25, "(a)", transform=plt.gca().transAxes, fontsize=20, va='center')
     plt.grid(linestyle='--')
     plt.xticks(ticks=x)
-    for idx, algo in enumerate(algorithm_in_fig):
-        plt.plot(x, data[algo]["target_value"], label=algo, color=color_list[idx], marker=marker_list[idx])
+    for idx, algo in enumerate(algorithm_list):
+        plt.plot(x, data[algo]["target_value"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
     # -------------------------- max delay --------------------------
     plt.subplot(1, 3, 2)
@@ -210,8 +211,8 @@ def draw_figures_shared_legend(data: dict):
     plt.text(0.5, -0.25, "(b)", transform=plt.gca().transAxes, fontsize=20, va='center')
     plt.grid(linestyle='--')
     plt.xticks(ticks=x)
-    for idx, algo in enumerate(algorithm_in_fig):
-        plt.plot(x, data[algo]["max_delay"], label=algo, color=color_list[idx], marker=marker_list[idx])
+    for idx, algo in enumerate(algorithm_list):
+        plt.plot(x, data[algo]["max_delay"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
     # ------------------------- average cost ----------------------------
     plt.subplot(1, 3, 3)
@@ -220,8 +221,8 @@ def draw_figures_shared_legend(data: dict):
     plt.text(0.48, -0.25, "(c)", transform=plt.gca().transAxes, fontsize=20, va='center')
     plt.grid(linestyle='--')
     plt.xticks(ticks=x)
-    for idx, algo in enumerate(algorithm_in_fig):
-        plt.plot(x, data[algo]["cost"], label=algo, color=color_list[idx], marker=marker_list[idx])
+    for idx, algo in enumerate(algorithm_list):
+        plt.plot(x, data[algo]["cost"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
     lines, labels = fig.axes[-1].get_legend_handles_labels()
     leg = fig.legend(lines, labels, bbox_to_anchor=(0.74, 0.96), ncol=4, framealpha=1)
@@ -229,7 +230,12 @@ def draw_figures_shared_legend(data: dict):
     plt.show()
 
 if __name__ == '__main__':
-    raw_data_path = "min_max/11-12_eta1.0_min-max-mgreedy-v2"
+    eta = 1.0
+    if eta == 0:
+        algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "Min-Avg", "Max-First", "Ours"]
+        algorithm_in_fig = ["Nearest", "M-Greedy(Tx)", "M-Greedy(Tx+Tp)", "Min-Avg", "Max-First", "Ours"]
+
+    raw_data_path = "min_max/11-12_eta{}_min-max-mgreedy-3kinds".format(eta)
     res_dict = process_data(raw_data_path)
     # print(res_dict)
 
@@ -237,4 +243,9 @@ if __name__ == '__main__':
     # draw_avg_cost(res_dict)
     # draw_target_value(res_dict)
     # draw_running_time(res_dict)
-    draw_figures_shared_legend(res_dict)
+    # draw_figures_shared_legend(res_dict)
+
+    if eta == 0:
+        draw_max_delay(res_dict)
+    else:
+        draw_figures_shared_legend(res_dict)

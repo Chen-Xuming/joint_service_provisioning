@@ -17,6 +17,7 @@ marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 
 # algorithm_list = ["Nearest", "Modify-Assignment", "RA-UA"]
 algorithm_list = ["Nearest", "Modify-Assignment", "Modify-Assignment-V2", "RA-UA"]
+algorithm_in_fig = ["Nearest", "Modify-Assignment", "Modify-Assignment-V2", "Ours"]
 
 
 # 获取一组实验的json文件的路径
@@ -203,7 +204,7 @@ def draw_avg_delay(avg_delays):
     for i in range(num_algorithms):
         if algs[i] == "None":
             continue
-        plt.plot(x, avg_delays[i], label=algs[i], color=color_list[i], marker=marker_list[i])
+        plt.plot(x, avg_delays[i], label=algorithm_in_fig[i], color=color_list[i], marker=marker_list[i])
 
     # plt.legend(fontsize=fontsize_legend, bbox_to_anchor=(1, 0.2))   # eta = 0
     leg = plt.legend(fontsize=fontsize_legend, loc='best')
@@ -231,7 +232,7 @@ def draw_cost(costs):
     for i in range(num_algorithms):
         if algs[i] == "None":
             continue
-        plt.plot(x, costs[i], label=algs[i], color=color_list[i], marker=marker_list[i])
+        plt.plot(x, costs[i], label=algorithm_in_fig[i], color=color_list[i], marker=marker_list[i])
 
     plt.legend(fontsize=fontsize_legend)
     # plt.savefig(save_file, bbox_inches="tight")
@@ -257,7 +258,7 @@ def draw_target_value(target_values):
     for i in range(num_algorithms):
         if algs[i] == "None":
             continue
-        plt.plot(x, target_values[i], label=algs[i], color=color_list[i], marker=marker_list[i])
+        plt.plot(x, target_values[i], label=algorithm_in_fig[i], color=color_list[i], marker=marker_list[i])
 
     plt.legend(fontsize=fontsize_legend)
     # plt.savefig(save_file, bbox_inches="tight")
@@ -285,7 +286,7 @@ def draw_running_time(times):
     for i in range(num_algorithms):
         if algs[i] == "None":
             continue
-        plt.plot(x, times[i], label=algs[i], color=color_list[i], marker=marker_list[i])
+        plt.plot(x, times[i], label=algorithm_in_fig[i], color=color_list[i], marker=marker_list[i])
 
     plt.legend(fontsize=fontsize_legend)
     # plt.savefig(save_file, bbox_inches="tight")
@@ -308,7 +309,7 @@ def draw_figures_shared_legend(avg_delays, avg_costs, target_values):
     for i in range(num_algorithms):
         if algs[i] == "None":
             continue
-        plt.plot(x, target_values[i], label=algs[i], color=color_list[i], marker=marker_list[i])
+        plt.plot(x, target_values[i], label=algorithm_in_fig[i], color=color_list[i], marker=marker_list[i])
 
     # -------------------------- average delay --------------------------
     plt.subplot(1, 3, 2)
@@ -322,7 +323,7 @@ def draw_figures_shared_legend(avg_delays, avg_costs, target_values):
     for i in range(num_algorithms):
         if algs[i] == "None":
             continue
-        plt.plot(x, avg_delays[i], label=algs[i], color=color_list[i], marker=marker_list[i])
+        plt.plot(x, avg_delays[i], label=algorithm_in_fig[i], color=color_list[i], marker=marker_list[i])
 
     # ------------------------- average cost ----------------------------
     plt.subplot(1, 3, 3)
@@ -336,7 +337,7 @@ def draw_figures_shared_legend(avg_delays, avg_costs, target_values):
     for i in range(num_algorithms):
         if algs[i] == "None":
             continue
-        plt.plot(x, avg_costs[i], label=algs[i], color=color_list[i], marker=marker_list[i])
+        plt.plot(x, avg_costs[i], label=algorithm_in_fig[i], color=color_list[i], marker=marker_list[i])
 
     lines, labels = fig.axes[-1].get_legend_handles_labels()
     leg = fig.legend(lines, labels, bbox_to_anchor=(0.74, 0.96), ncol=4, framealpha=1)
@@ -360,7 +361,7 @@ def draw_figures(avg_delays, avg_costs, target_values):
     for i in range(num_algorithms):
         if algs[i] == "None":
             continue
-        plt.plot(x, target_values[i], label=algs[i], color=color_list[i], marker=marker_list[i])
+        plt.plot(x, target_values[i], label=algorithm_in_fig[i], color=color_list[i], marker=marker_list[i])
     leg1 = plt.legend(fontsize=fontsize_legend)
     leg1.set_draggable(state=True)
 
@@ -377,7 +378,7 @@ def draw_figures(avg_delays, avg_costs, target_values):
     for i in range(num_algorithms):
         if algs[i] == "None":
             continue
-        plt.plot(x, avg_delays[i], label=algs[i], color=color_list[i], marker=marker_list[i])
+        plt.plot(x, avg_delays[i], label=algorithm_in_fig[i], color=color_list[i], marker=marker_list[i])
     # plt.legend(fontsize=fontsize_legend, bbox_to_anchor=(1, 0.5))   # eta = 0
     leg2 = plt.legend(fontsize=fontsize_legend)
     leg2.set_draggable(state=True)
@@ -395,7 +396,7 @@ def draw_figures(avg_delays, avg_costs, target_values):
     for i in range(num_algorithms):
         if algs[i] == "None":
             continue
-        plt.plot(x, avg_costs[i], label=algs[i], color=color_list[i], marker=marker_list[i])
+        plt.plot(x, avg_costs[i], label=algorithm_in_fig[i], color=color_list[i], marker=marker_list[i])
     leg3 = plt.legend(fontsize=fontsize_legend)
     leg3.set_draggable(state=True)
 
@@ -403,11 +404,20 @@ def draw_figures(avg_delays, avg_costs, target_values):
 
 
 if __name__ == '__main__':
-    raw_data_path = "min_avg/10-24_eta0_ma-v2"
+    eta = 1.0
+
+    raw_data_path = "min_avg/11-13_eta{}_new-site-params".format(eta)
 
     avg_delay, cost, target_value, running_time = process_data(raw_data_path)
-    # draw_target_value(target_value)
-    draw_avg_delay(avg_delay)
+
+    if eta == 0:
+        draw_avg_delay(avg_delay)
+    else:
+        draw_figures_shared_legend(avg_delay, cost, target_value)
+
+    # avg_delay, cost, target_value, running_time = process_data(raw_data_path)
+    # # draw_target_value(target_value)
+    # draw_avg_delay(avg_delay)
     # draw_cost(cost)
     # draw_running_time(running_time)
 
