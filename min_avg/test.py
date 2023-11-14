@@ -28,7 +28,7 @@ for sim_id in range(sim_times):
     nearest_alg.run()
     print(nearest_alg.get_results())
 
-    print("------------- Modify-Assignment ------------------------")
+    print("------------- Modify-Assignment(Tx) ------------------------")
     env = Environment(conf, env_seed)
     env.reset(num_user=num_user, user_seed=u_seed)
     nearest_alg = NearestAlgorithm(env, do_RA=True, stable_only=False)
@@ -37,15 +37,25 @@ for sim_id in range(sim_times):
     ma_alg.run()
     print(ma_alg.get_results())
 
-    print("------------- Modify-Assignment-V2 ------------------------")
+    print("------------- Modify-Assignment(Tx+Tp) ------------------------")
     env = Environment(conf, env_seed)
     env.reset(num_user=num_user, user_seed=u_seed)
     nearest_alg = NearestAlgorithm(env, do_RA=True, stable_only=False)
     nearest_alg.run()
-    ma2_alg = ModifyAssignmentAlgorithm_V2(env)
-    ma2_alg.debug_flag = True
+    ma2_alg = ModifyAssignmentAlgorithm_V2(env, t_compositions=0b110)
+    ma2_alg.debug_flag = False
     ma2_alg.run()
     print(ma2_alg.get_results())
+
+    print("------------- Modify-Assignment(Tx+Tp+Tq) ------------------------")
+    env = Environment(conf, env_seed)
+    env.reset(num_user=num_user, user_seed=u_seed)
+    nearest_alg = NearestAlgorithm(env, do_RA=True, stable_only=False)
+    nearest_alg.run()
+    ma3_alg = ModifyAssignmentAlgorithm_V2(env, t_compositions=0b111)
+    ma3_alg.debug_flag = False
+    ma3_alg.run()
+    print(ma3_alg.get_results())
 
     print("------------- Ours ------------------------")
     env = Environment(conf, env_seed)

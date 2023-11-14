@@ -4,6 +4,7 @@
 
 import copy
 import math
+import numpy as np
 
 from min_avg.base import BaseMinAvgAlgorithm
 from env.site_node import SiteNode
@@ -12,9 +13,9 @@ from time import time
 from env.service import Service
 
 class ModifyAssignmentAlgorithm(BaseMinAvgAlgorithm):
-    def __init__(self, env, consider_cost_tq=True, stable_only=False, *args, **kwargs):
+    def __init__(self, env, consider_cost_tq=True, stable_only=False, t_compositions=0b100, *args, **kwargs):
         BaseMinAvgAlgorithm.__init__(self, env, *args, **kwargs)
-        self.algorithm_name = "modify_assignment" if "algorithm_name" not in kwargs else kwargs["algorithm_name"]
+        self.algorithm_name = "modify_assignment_v2" if "algorithm_name" not in kwargs else kwargs["algorithm_name"]
 
         self.consider_cost_tq = consider_cost_tq
         self.stable_only = stable_only  # 仅当 consider_cost_tq=True 时有效
@@ -28,6 +29,24 @@ class ModifyAssignmentAlgorithm(BaseMinAvgAlgorithm):
         assert self.have_initial_solution(), "Input environment is illegal."
 
         self.L = dict()
+
+        # 计算 max-T 过程中考虑哪些成分（Tx, Tp, Tq）
+        # 100: Tx = 1, Tp = 0, Tq = 0   # 只考虑Tx
+        self.T_flags = [False for i in range(3)]
+        self.T_flags[0] = bool(t_compositions & 4)
+        self.T_flags[1] = bool(t_compositions & 2)
+        self.T_flags[2] = bool(t_compositions & 1)
+        self.DEBUG("Tx = {}, Tp = {}, Tq = {}".format(self.T_flags[0], self.T_flags[1], self.T_flags[2]))
+
+        if self.T_flags[1]:
+            self.tp_serviceA = np.zeros(self.env.site_num)      # ms
+            self.tp_serviceR = np.zeros(self.env.site_num)      # ms
+
+        if self.T_flags[2]:
+            self.best_x_serviceA = np.zeros((self.env.user_num, self.env.site_num))
+            self.best_x_serviceR = np.zeros((self.env.user_num, self.env.site_num))
+            self.tq_serviceA = np.zeros((self.env.user_num, self.env.site_num))         # ms
+            self.tq_serviceR = np.zeros((self.env.user_num, self.env.site_num))         # ms
 
     def run(self):
         self.start_time = time()
@@ -49,6 +68,25 @@ class ModifyAssignmentAlgorithm(BaseMinAvgAlgorithm):
         尝试修改用户服务的卸载位置，使得交互时延之和减小，重复操作知道不再减小为止
     """
     def solve(self):
+        if self.T_flags[1]:
+            for sid in range(self.env.site_num):
+                site = self.env.sites[sid]          # type: SiteNode
+                self.tp_serviceA[sid] = 1 / site.service_rate_a * 1000
+                self.tp_serviceR[sid] = 1 / site.service_rate_r * 1000
+
+        if self.T_flags[2]:
+            for uid in range(self.env.user_num):
+                user = self.env.users[uid]          # type: UserNode
+                for sid in range(self.env.site_num):
+                    site = self.env.sites[sid]      # type: SiteNode
+
+                    self.best_x_serviceA[uid][sid], self.tq_serviceA[uid][sid] = self.get_best_x_and_tq(user.service_a.arrival_rate,
+                                                                                                        site.service_rate_a,
+                                                                                                        sigma=self.env.eta * site.price_a)
+                    self.best_x_serviceR[uid][sid], self.tq_serviceR[uid][sid] = self.get_best_x_and_tq(user.service_r.arrival_rate,
+                                                                                                        site.service_rate_r,
+                                                                                                        sigma=self.env.eta * site.price_r)
+
         iteration = 1
         while True:
             self.DEBUG("---------- iteration {} -----------".format(iteration))
@@ -116,40 +154,58 @@ class ModifyAssignmentAlgorithm(BaseMinAvgAlgorithm):
         original_sum = 0
         if service_type == "A":
             for user_to in self.env.users:  # type: UserNode
-                original_sum += self.env.tx_user_node[cur_user.user_id][cur_user.service_a.node_id] * \
-                                self.env.data_size[0] + \
-                                self.env.tx_node_node[cur_user.service_a.node_id][user_to.service_r.node_id] * \
-                                self.env.data_size[1] + \
-                                self.env.tx_node_user[user_to.service_r.node_id][user_to.user_id] * \
-                                self.env.data_size[2]
-                original_sum += 1 / self.env.sites[cur_user.service_a.node_id].service_rate_a * 1000
+                if self.T_flags[0]:
+                    original_sum += self.env.tx_user_node[cur_user.user_id][cur_user.service_a.node_id] * \
+                                    self.env.data_size[0] + \
+                                    self.env.tx_node_node[cur_user.service_a.node_id][user_to.service_r.node_id] * \
+                                    self.env.data_size[1] + \
+                                    self.env.tx_node_user[user_to.service_r.node_id][user_to.user_id] * \
+                                    self.env.data_size[2]
+                if self.T_flags[1]:
+                    original_sum += self.tp_serviceA[cur_user.service_a.node_id]
+                if self.T_flags[2]:
+                    original_sum += self.tq_serviceA[cur_user.user_id][cur_user.service_a.node_id]
+
         elif service_type == "R":
             for user_from in self.env.users:  # type: UserNode
-                original_sum = self.env.tx_user_node[user_from.user_id][user_from.service_a.node_id] * \
-                               self.env.data_size[0] + \
-                               self.env.tx_node_node[user_from.service_a.node_id][cur_user.service_r.node_id] * \
-                               self.env.data_size[1] + \
-                               self.env.tx_node_user[cur_user.service_r.node_id][cur_user.user_id] * \
-                               self.env.data_size[2]
-                original_sum += 1 / self.env.sites[cur_user.service_r.node_id].service_rate_r * 1000
+                if self.T_flags[0]:
+                    original_sum = self.env.tx_user_node[user_from.user_id][user_from.service_a.node_id] * \
+                                   self.env.data_size[0] + \
+                                   self.env.tx_node_node[user_from.service_a.node_id][cur_user.service_r.node_id] * \
+                                   self.env.data_size[1] + \
+                                   self.env.tx_node_user[cur_user.service_r.node_id][cur_user.user_id] * \
+                                   self.env.data_size[2]
+                if self.T_flags[1]:
+                    original_sum += self.tp_serviceR[cur_user.service_r.node_id]
+                if self.T_flags[2]:
+                    original_sum += self.tq_serviceR[cur_user.user_id][cur_user.service_r.node_id]
 
         # 计算修改后的时延和
         new_sum = 0
         if service_type == "A":
             for user_to in self.env.users:  # type: UserNode
-                new_sum += self.env.tx_user_node[cur_user.user_id][target_site.global_id] * self.env.data_size[0] + \
-                           self.env.tx_node_node[target_site.global_id][user_to.service_r.node_id] * \
-                           self.env.data_size[1] + \
-                           self.env.tx_node_user[user_to.service_r.node_id][user_to.user_id] * self.env.data_size[2]
-                new_sum += 1 / target_site.service_rate_a * 1000
+                if self.T_flags[0]:
+                    new_sum += self.env.tx_user_node[cur_user.user_id][target_site.global_id] * self.env.data_size[0] + \
+                               self.env.tx_node_node[target_site.global_id][user_to.service_r.node_id] * \
+                               self.env.data_size[1] + \
+                               self.env.tx_node_user[user_to.service_r.node_id][user_to.user_id] * self.env.data_size[2]
+                if self.T_flags[1]:
+                    new_sum += self.tp_serviceA[target_site.global_id]
+                if self.T_flags[2]:
+                    new_sum += self.tq_serviceA[cur_user.user_id][target_site.global_id]
+
         elif service_type == "R":
             for user_from in self.env.users:  # type: UserNode
-                new_sum += self.env.tx_user_node[user_from.user_id][user_from.service_a.node_id] * \
-                           self.env.data_size[0] + \
-                           self.env.tx_node_node[user_from.service_a.node_id][target_site.global_id] * \
-                           self.env.data_size[1] + \
-                           self.env.tx_node_user[target_site.global_id][cur_user.user_id] * self.env.data_size[2]
-                new_sum += 1 / target_site.service_rate_r * 1000
+                if self.T_flags[0]:
+                    new_sum += self.env.tx_user_node[user_from.user_id][user_from.service_a.node_id] * \
+                               self.env.data_size[0] + \
+                               self.env.tx_node_node[user_from.service_a.node_id][target_site.global_id] * \
+                               self.env.data_size[1] + \
+                               self.env.tx_node_user[target_site.global_id][cur_user.user_id] * self.env.data_size[2]
+                if self.T_flags[1]:
+                    new_sum += self.tp_serviceR[target_site.global_id]
+                if self.T_flags[2]:
+                    new_sum += self.tq_serviceR[cur_user.user_id][target_site.global_id]
 
         return original_sum - new_sum
 
@@ -165,6 +221,40 @@ class ModifyAssignmentAlgorithm(BaseMinAvgAlgorithm):
                                      self.env.tx_node_user[user_to.service_r.node_id][user_to.user_id] * self.env.data_size[2]
                 total += transmission_delay
         return total
+
+    """
+        计算最佳服务器及其排队时延
+        sigma = eta * price
+    """
+    @staticmethod
+    def get_best_x_and_tq(lambda_, miu_, sigma):
+        a = lambda_ / miu_
+        x = 0
+        B = 1
+
+        while x <= a:
+            x += 1
+            B = a * B / (x + a * B)
+        C_old = x * B / (x - a + a * B)
+
+        while True:
+            x = x + 1
+            B = a * B / (x + a * B)
+            C_new = x * B / (x - a + a * B)
+
+            t_now = C_new / ((x - a) * miu_) * 1000
+            t_old = C_old / ((x - 1 - a) * miu_) * 1000
+            delta_t = t_old - t_now
+            if delta_t <= sigma:
+                break
+
+            C_old = C_new
+
+        x_star = x - 1
+        t_x_star = t_old
+        # phi_star = t_x_star + sigma * x_star
+
+        return int(x_star), t_x_star
 
     """
         计算一个某个服务的最佳数量
