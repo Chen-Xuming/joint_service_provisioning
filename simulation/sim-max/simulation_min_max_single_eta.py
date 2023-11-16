@@ -26,7 +26,7 @@ print("Script started at {}.".format(datetime.now()))
 
 """ 创建文件夹 """
 description = "min-max-mgreedy-3kinds"        # fixme
-res_dir = "../../result/min_max/11-12_eta{}_{}".format(conf["eta"], description)
+res_dir = "../../result/min_max/11-15_eta{}_{}".format(conf["eta"], description)
 if not os.path.exists(res_dir):
     os.makedirs(res_dir)
 
@@ -34,13 +34,13 @@ print("res_dir = {}".format(res_dir))
 
 env_seed = 99497
 
-simulation_no = 2  # 文件号
+simulation_no = 4  # 文件号
 print("simulation_no = {}".format(simulation_no))
 
 # 用户数及测试次数
 user_range = (40, 100)
 user_range_step = 10
-simulation_times_each_num_user = 15
+simulation_times_each_num_user = 50
 
 # algorithms = ["Nearest", "Modify-Assignment", "M-Greedy", "Shortest-Path", "Shortest-Path-V2"]
 
