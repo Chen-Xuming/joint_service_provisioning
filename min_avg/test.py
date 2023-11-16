@@ -28,12 +28,21 @@ for sim_id in range(sim_times):
     nearest_alg.run()
     print(nearest_alg.get_results())
 
-    print("------------- Modify-Assignment(Tx) ------------------------")
+    print("------------- Modify-Assignment(original) ------------------------")
     env = Environment(conf, env_seed)
     env.reset(num_user=num_user, user_seed=u_seed)
     nearest_alg = NearestAlgorithm(env, do_RA=True, stable_only=False)
     nearest_alg.run()
     ma_alg = ModifyAssignmentAlgorithm(env)
+    ma_alg.run()
+    print(ma_alg.get_results())
+
+    print("------------- Modify-Assignment(Tx) ------------------------")
+    env = Environment(conf, env_seed)
+    env.reset(num_user=num_user, user_seed=u_seed)
+    nearest_alg = NearestAlgorithm(env, do_RA=True, stable_only=False)
+    nearest_alg.run()
+    ma_alg = ModifyAssignmentAlgorithm_V2(env, t_compositions=0b100)
     ma_alg.run()
     print(ma_alg.get_results())
 

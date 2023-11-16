@@ -325,8 +325,10 @@ if __name__ == "__main__":
     nearest_alg.run()
     print(nearest_alg.avg_delay, nearest_alg.final_avg_cost, nearest_alg.target_value)
 
-    ma2 = ModifyAssignmentAlgorithm(env, consider_cost_tq=False, stable_only=False)
+    ma2 = ModifyAssignmentAlgorithm(env, consider_cost_tq=False, stable_only=False, t_compositions=0b111)
+    ma2.debug_flag = True
     ma2.run()
+    ma2.result_info()
     print(ma2.avg_delay, ma2.final_avg_cost, ma2.target_value)
 
 

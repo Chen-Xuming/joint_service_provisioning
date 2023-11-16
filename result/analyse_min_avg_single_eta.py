@@ -16,17 +16,15 @@ fontsize_legend = 20
 color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
 # color_list = ['#002c53', '#9c403d', '#8983BF', '#58B272', '#f28522', '#009ade', '#ff1f5b']
 
+# color_list = ['#f28522', '#58B272', '#9c403d', '#009ade', '#ff1f5b']
+
+
 marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 
-# algorithm_list = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
-# algorithm_in_fig = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
-#
 
-# algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "M-Greedy-V2(Tx+Tp+Tq)", "Min-Avg", "Max-First", "Ours"]
-# algorithm_in_fig = ["Nearest", "M-Greedy(Tx)", "M-Greedy(Tx+Tp)", "M-Greedy(Tx+Tp+Tq)", "Min-Avg", "Max-First", "Ours"]
+algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
+algorithm_in_fig = ["Nearest", "Modify-Assignment", "Modify-Assignment-V2", "Min-Avg"]
 
-algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
-algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
 
 # 获取一组实验的json文件的路径
 def get_json_file_list(dir_path):
@@ -50,7 +48,7 @@ def process_data(dir_path):
         data = {
             40: {
                 "Nearest": {
-                    "max_delay": 100,
+                    "avg_delay": 100,
                     "cost:: 101,
                     ...
                 },
@@ -64,7 +62,7 @@ def process_data(dir_path):
         data[u] = {}
         for algo in algorithm_list:
             data[u][algo] = {
-                "max_delay": [],
+                "avg_delay": [],
                 "cost": [],
                 "target_value": [],
                 "running_time": [],
@@ -94,13 +92,13 @@ def process_data(dir_path):
                 data[u][algo][attr] = np.mean(data[u][algo][attr])
 
             # 单位转换
-            data[u][algo]["max_delay"] = data[u][algo]["max_delay"] * 1000              # ms
+            data[u][algo]["avg_delay"] = data[u][algo]["avg_delay"] * 1000              # ms
             data[u][algo]["running_time"] = data[u][algo]["running_time"] / 1000        # s
 
     """
         final_data = {
             "Nearest": {
-                "max_delay": [...],     # 不同用户数下的平均最大时延
+                "avg_delay": [...],     # 不同用户数下的平均最大时延
                 ..
             },
             ...
@@ -109,7 +107,7 @@ def process_data(dir_path):
     final_data = {}
     for algo in algorithm_list:
         final_data[algo] = {
-            "max_delay": [],
+            "avg_delay": [],
             "cost": [],
             "target_value": [],
             "running_time": [],
@@ -124,9 +122,9 @@ def process_data(dir_path):
 
     return final_data
 
-def draw_max_delay(data: dict):
+def draw_avg_delay(data: dict):
     plt.figure(figsize=(5, 5))
-    plt.ylabel("Maximum Interaction Latency (ms)", fontsize=fontsize+3)
+    plt.ylabel("Average Interaction Latency (ms)", fontsize=fontsize+3)
     plt.xlabel("Number of Users", fontsize=fontsize+3)
     plt.grid(linestyle='--')
     plt.tight_layout()
@@ -135,7 +133,7 @@ def draw_max_delay(data: dict):
     plt.xticks(ticks=x)
 
     for idx, algo in enumerate(algorithm_list):
-        plt.plot(x, data[algo]["max_delay"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
+        plt.plot(x, data[algo]["avg_delay"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
     leg = plt.legend(fontsize=fontsize_legend, loc='best')
     leg.set_draggable(state=True)
@@ -160,7 +158,7 @@ def draw_avg_cost(data: dict):
 
 def draw_target_value(data: dict):
     plt.figure()
-    plt.ylabel("Weighted Sum of Maximum\nLatency and Cost")
+    plt.ylabel("Weighted Sum of Average\nLatency and Cost")
     plt.xlabel("Number of Users")
     plt.grid(linestyle='--')
     plt.tight_layout()
@@ -177,7 +175,7 @@ def draw_target_value(data: dict):
 
 def draw_running_time(data: dict):
     plt.figure()
-    plt.ylabel("Weighted Sum of Maximum\nLatency and Cost")
+    plt.ylabel("Average Running Time (s)")
     plt.xlabel("Number of Users")
     plt.grid(linestyle='--')
     plt.tight_layout()
@@ -199,7 +197,7 @@ def draw_figures_shared_legend(data: dict):
 
     # ------------------------- target value ---------------------------
     plt.subplot(1, 3, 1)
-    plt.ylabel("Weighted Sum of Maximum\nLatency and Cost")
+    plt.ylabel("Weighted Sum of Average\nLatency and Cost")
     plt.xlabel("Number of Users")
     plt.text(0.5, -0.25, "(a)", transform=plt.gca().transAxes, fontsize=20, va='center')
     plt.grid(linestyle='--')
@@ -207,15 +205,15 @@ def draw_figures_shared_legend(data: dict):
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["target_value"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    # -------------------------- max delay --------------------------
+    # -------------------------- avg delay --------------------------
     plt.subplot(1, 3, 2)
-    plt.ylabel("Maximum Interaction Latency (ms)")
+    plt.ylabel("Average Interaction Latency (ms)")
     plt.xlabel("Number of Users")
     plt.text(0.5, -0.25, "(b)", transform=plt.gca().transAxes, fontsize=20, va='center')
     plt.grid(linestyle='--')
     plt.xticks(ticks=x)
     for idx, algo in enumerate(algorithm_list):
-        plt.plot(x, data[algo]["max_delay"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
+        plt.plot(x, data[algo]["avg_delay"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
     # ------------------------- average cost ----------------------------
     plt.subplot(1, 3, 3)
@@ -235,20 +233,20 @@ def draw_figures_shared_legend(data: dict):
 if __name__ == '__main__':
     eta = 0
     if eta == 0:
-        algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "Ours"]
-        algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
+        algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp)", "Ours"]
+        algorithm_in_fig = ["Nearest", "Modify-Assignment", "Modify-Assignment-V2", "Min-Avg"]
 
-    raw_data_path = "min_max/11-12_eta{}_min-max-mgreedy-3kinds".format(eta)
+    raw_data_path = "min_avg/11-14_eta{}_min-avg-ma-3kinds".format(eta)
     res_dict = process_data(raw_data_path)
     # print(res_dict)
 
-    # draw_max_delay(res_dict)
+    # draw_avg_delay(res_dict)
     # draw_avg_cost(res_dict)
     # draw_target_value(res_dict)
     # draw_running_time(res_dict)
     # draw_figures_shared_legend(res_dict)
 
     if eta == 0:
-        draw_max_delay(res_dict)
+        draw_avg_delay(res_dict)
     else:
         draw_figures_shared_legend(res_dict)
