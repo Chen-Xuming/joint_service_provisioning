@@ -7,19 +7,25 @@ import numpy as np
 import os
 
 fontsize = 20
-linewidth = 2
-markersize = 8
+linewidth = 3
+markersize = 10
 plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
 fontsize_legend = 20
 # color_list = ['#2878b5',  '#F28522', '#58B272', '#FF1F5B', '#991a4e', '#1f77b4', '#A6761D', '#009ADE', '#AF58BA']
-color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
+# color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
+color_list = ['#58B272', '#009ade', '#ff1f5b']
+
 # color_list = ['#002c53', '#9c403d', '#8983BF', '#58B272', '#f28522', '#009ade', '#ff1f5b']
 
-marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
+# marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
+marker_list = ['d', 'X', 'o', '^', 's', 'v', 'P',  '*','>','<','x']
 
 algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
+# algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "GSP", "Ours"]
+# etas = [0, 0.25, 0.5, 0.75, 1.0]    # fixme
 
-etas = [0, 0.25, 0.5, 0.75, 1.0]    # fixme
+etas = [0.5, 0.75, 1.0]    # fixme
+
 
 user_range = (40, 100)
 user_step = 10
@@ -56,23 +62,95 @@ def get_reduction_ratio(res_dict, attribute: str, original_algorithm="Modify-Ass
     return reduction_ratios
 
 def draw_reduction_ratio(reduction_ratios, attribute: str):
-    plt.figure()
-    plt.ylabel("Reduction Ratio (%)", fontsize=fontsize+3)
-    plt.xlabel("Number of Users", fontsize=fontsize+3)
+    plt.figure(figsize=(10, 10), dpi=100)
+
+    y_label = ""
+    if attribute == "target_value":
+        y_label = "Reduction Ratio of Weighted Sum of \nAverage Latency and Cost (%)"
+    if attribute == "avg_delay":
+        y_label = "Reduction Ratio of\nAverage Interaction Latency (%)"
+    if attribute == "cost":
+        y_label = "Reduction Ratio of Average Cost (%)"
+
+    plt.ylabel(ylabel=y_label, fontsize=fontsize+10, labelpad=10)
+    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
-    plt.xticks(ticks=x)
+    plt.xticks(ticks=x, fontsize=fontsize+8)
+    plt.yticks(fontsize=fontsize + 8)
+
+    if attribute == "target_value":
+        y = [i for i in range(22, 44+2, 2)]
+        plt.yticks(y)
+    # if attribute == "avg_delay":
+    #     y = [i for i in range(0, 8+1, 1)]
+    #     plt.yticks(y)
 
     idx = 0
     for eta, ratios in reduction_ratios.items():
         plt.plot(x, ratios, label=r'$\eta={}$'.format(eta), color=color_list[idx], marker=marker_list[idx])
         idx += 1
 
-    leg = plt.legend(fontsize=fontsize_legend)
+    leg = plt.legend(fontsize=fontsize_legend+2)
     leg.set_draggable(state=True)
 
+    plt.show()
+
+def get_and_draw_all_reduction_ratios(res_dict, origin_algo="Modify-Assignment(Tx+Tp+Tq)"):
+    target_value_rr = get_reduction_ratio(raw_result, original_algorithm=origin_algo, attribute="target_value")
+    avg_delay_rr = get_reduction_ratio(raw_result, original_algorithm=origin_algo, attribute="avg_delay")
+    avg_cost_rr = get_reduction_ratio(raw_result, original_algorithm=origin_algo, attribute="cost")
+
+    fig = plt.figure()
+    x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
+
+    # ------------------------- target value ---------------------------
+    plt.subplot(1, 3, 1)
+    plt.ylabel("Reduction Ratio of Weighted Sum of \nAverage Latency and Cost (%)")
+    plt.xlabel("Number of Users")
+    plt.text(0.5, -0.25, "(a)", transform=plt.gca().transAxes, fontsize=20, va='center')
+    plt.grid(linestyle='--')
+    plt.xticks(ticks=x)
+    idx = 0
+    for eta, ratios in target_value_rr.items():
+        if eta == 0:
+            continue
+        plt.plot(x, ratios, label=r'$\eta={}$'.format(eta), color=color_list[idx], marker=marker_list[idx])
+        idx += 1
+
+    # -------------------------- avg delay --------------------------
+    plt.subplot(1, 3, 2)
+    plt.ylabel("Reduction Ratio of\nAverage Interaction Latency (%)")
+    plt.xlabel("Number of Users")
+    plt.text(0.5, -0.25, "(b)", transform=plt.gca().transAxes, fontsize=20, va='center')
+    plt.grid(linestyle='--')
+    plt.xticks(ticks=x)
+    idx = 0
+    for eta, ratios in avg_delay_rr.items():
+        if eta == 0:
+            continue
+        plt.plot(x, ratios, label=r'$\eta={}$'.format(eta), color=color_list[idx], marker=marker_list[idx])
+        idx += 1
+
+    # ------------------------- average cost ----------------------------
+    plt.subplot(1, 3, 3)
+    plt.ylabel("Reduction Ratio of Average Cost (%)")
+    plt.xlabel("Number of Users")
+    plt.text(0.48, -0.25, "(c)", transform=plt.gca().transAxes, fontsize=20, va='center')
+    plt.grid(linestyle='--')
+    plt.xticks(ticks=x)
+    idx = 0
+    for eta, ratios in avg_cost_rr.items():
+        if eta == 0:
+            continue
+        plt.plot(x, ratios, label=r'$\eta={}$'.format(eta), color=color_list[idx], marker=marker_list[idx])
+        idx += 1
+
+    lines, labels = fig.axes[-1].get_legend_handles_labels()
+    leg = fig.legend(lines, labels, bbox_to_anchor=(0.74, 0.96), ncol=4, framealpha=1)
+    leg.set_draggable(state=True)
     plt.show()
 
 def get_offloading_ratio(res_dict):
@@ -92,8 +170,15 @@ if __name__ == '__main__':
     # print(raw_result)
 
     target_value_reduction_ratios = get_reduction_ratio(raw_result, "target_value")
-    # target_value_reduction_ratios = get_reduction_ratio(raw_result, "target_value", original_algorithm="Nearest")
     draw_reduction_ratio(target_value_reduction_ratios, "target_value")
 
-    offloading_distribution = get_offloading_ratio(raw_result)
-    print(offloading_distribution)
+    avg_delay_reduction_ratios = get_reduction_ratio(raw_result, "avg_delay")
+    draw_reduction_ratio(avg_delay_reduction_ratios, "avg_delay")
+
+    cost_reduction_ratios = get_reduction_ratio(raw_result, "cost")
+    draw_reduction_ratio(cost_reduction_ratios, "cost")
+
+    # offloading_distribution = get_offloading_ratio(raw_result)
+    # print(offloading_distribution)
+
+    # get_and_draw_all_reduction_ratios(raw_result)

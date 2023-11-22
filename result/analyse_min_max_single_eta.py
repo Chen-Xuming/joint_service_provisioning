@@ -28,6 +28,7 @@ marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
 algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
 
+
 # 获取一组实验的json文件的路径
 def get_json_file_list(dir_path):
     files = []
@@ -238,7 +239,7 @@ if __name__ == '__main__':
         algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "Ours"]
         algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
 
-    raw_data_path = "min_max/11-12_eta{}_min-max-mgreedy-3kinds".format(eta)
+    raw_data_path = "min_max/11-22_eta{}_min-max-gsp".format(eta)
     res_dict = process_data(raw_data_path)
     # print(res_dict)
 

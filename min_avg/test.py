@@ -2,6 +2,7 @@ from min_avg.min_avg_ours import MinAvgOurs
 from min_avg.nearest import NearestAlgorithm
 from min_avg.modify_assignment import ModifyAssignmentAlgorithm
 from min_avg.modify_assignment_v2 import ModifyAssignmentAlgorithm as ModifyAssignmentAlgorithm_V2
+from min_avg.greedy_server_provisioning import GreedyServerProvisioningAlgorithm
 
 from env.environment2 import Environment
 from configuration.config import config as conf
@@ -27,44 +28,33 @@ for sim_id in range(sim_times):
     nearest_alg = NearestAlgorithm(env)
     nearest_alg.run()
     print(nearest_alg.get_results())
+    #
+    # print("------------- Modify-Assignment(original) ------------------------")
+    # env = Environment(conf, env_seed)
+    # env.reset(num_user=num_user, user_seed=u_seed)
+    # nearest_alg = NearestAlgorithm(env, do_RA=True, stable_only=False)
+    # nearest_alg.run()
+    # ma_alg = ModifyAssignmentAlgorithm(env)
+    # ma_alg.run()
+    # print(ma_alg.get_results())
+    #
+    # print("------------- Modify-Assignment(Tx+Tp+Tq) ------------------------")
+    # env = Environment(conf, env_seed)
+    # env.reset(num_user=num_user, user_seed=u_seed)
+    # nearest_alg = NearestAlgorithm(env, do_RA=True, stable_only=False)
+    # nearest_alg.run()
+    # ma3_alg = ModifyAssignmentAlgorithm_V2(env, t_compositions=0b111)
+    # ma3_alg.debug_flag = False
+    # ma3_alg.run()
+    # print(ma3_alg.get_results())
 
-    print("------------- Modify-Assignment(original) ------------------------")
+    print("------------- GSP ------------------------")
     env = Environment(conf, env_seed)
     env.reset(num_user=num_user, user_seed=u_seed)
-    nearest_alg = NearestAlgorithm(env, do_RA=True, stable_only=False)
-    nearest_alg.run()
-    ma_alg = ModifyAssignmentAlgorithm(env)
-    ma_alg.run()
-    print(ma_alg.get_results())
-
-    print("------------- Modify-Assignment(Tx) ------------------------")
-    env = Environment(conf, env_seed)
-    env.reset(num_user=num_user, user_seed=u_seed)
-    nearest_alg = NearestAlgorithm(env, do_RA=True, stable_only=False)
-    nearest_alg.run()
-    ma_alg = ModifyAssignmentAlgorithm_V2(env, t_compositions=0b100)
-    ma_alg.run()
-    print(ma_alg.get_results())
-
-    print("------------- Modify-Assignment(Tx+Tp) ------------------------")
-    env = Environment(conf, env_seed)
-    env.reset(num_user=num_user, user_seed=u_seed)
-    nearest_alg = NearestAlgorithm(env, do_RA=True, stable_only=False)
-    nearest_alg.run()
-    ma2_alg = ModifyAssignmentAlgorithm_V2(env, t_compositions=0b110)
-    ma2_alg.debug_flag = False
-    ma2_alg.run()
-    print(ma2_alg.get_results())
-
-    print("------------- Modify-Assignment(Tx+Tp+Tq) ------------------------")
-    env = Environment(conf, env_seed)
-    env.reset(num_user=num_user, user_seed=u_seed)
-    nearest_alg = NearestAlgorithm(env, do_RA=True, stable_only=False)
-    nearest_alg.run()
-    ma3_alg = ModifyAssignmentAlgorithm_V2(env, t_compositions=0b111)
-    ma3_alg.debug_flag = False
-    ma3_alg.run()
-    print(ma3_alg.get_results())
+    gsp_alg = GreedyServerProvisioningAlgorithm(env, avg_t_compositions=0b111)
+    gsp_alg.debug_flag = True
+    gsp_alg.run()
+    print(gsp_alg.get_results())
 
     print("------------- Ours ------------------------")
     env = Environment(conf, env_seed)
@@ -72,3 +62,4 @@ for sim_id in range(sim_times):
     min_avg_alg = MinAvgOurs(env)
     min_avg_alg.run()
     print(min_avg_alg.get_results())
+

@@ -1,17 +1,23 @@
+"""
+论文：Analysis of Server Provisioning for Distributed Interactive Applications
+
+相当于 M-Greedy 的 min-avg 版本
+"""
+
 import copy
 import math
 
-from min_max.base import BaseMinMaxAlgorithm
+from min_avg.base import BaseMinAvgAlgorithm
 from env.site_node import SiteNode
 from env.user_node import UserNode
 from time import time
 from env.service import Service
 import numpy as np
 
-class MGreedyAlgorithm_V2(BaseMinMaxAlgorithm):
-    def __init__(self, env, consider_cost_tq=True, stable_only=False, max_t_compositions=0b100, *args, **kwargs):
-        BaseMinMaxAlgorithm.__init__(self, env, *args, **kwargs)
-        self.algorithm_name = "MGreedy_V2" if "algorithm_name" not in kwargs else kwargs["algorithm_name"]
+class GreedyServerProvisioningAlgorithm(BaseMinAvgAlgorithm):
+    def __init__(self, env, consider_cost_tq=True, stable_only=False, avg_t_compositions=0b100, *args, **kwargs):
+        BaseMinAvgAlgorithm.__init__(self, env, *args, **kwargs)
+        self.algorithm_name = "GSP" if "algorithm_name" not in kwargs else kwargs["algorithm_name"]
 
         self.consider_cost_tq = consider_cost_tq
         self.stable_only = stable_only  # 仅当 consider_cost_tq=True 时有效
@@ -30,12 +36,14 @@ class MGreedyAlgorithm_V2(BaseMinMaxAlgorithm):
 
         self.M = self.env.site_num      # fixme
 
+        self.n_2 = self.env.user_num ** 2
+
         # 计算 max-T 过程中考虑哪些成分（Tx, Tp, Tq）
         # 100: Tx = 1, Tp = 0, Tq = 0   # 只考虑Tx
         self.T_flags = [False for i in range(3)]
-        self.T_flags[0] = bool(max_t_compositions & 4)
-        self.T_flags[1] = bool(max_t_compositions & 2)
-        self.T_flags[2] = bool(max_t_compositions & 1)
+        self.T_flags[0] = bool(avg_t_compositions & 4)
+        self.T_flags[1] = bool(avg_t_compositions & 2)
+        self.T_flags[2] = bool(avg_t_compositions & 1)
         self.DEBUG("Tx = {}, Tp = {}, Tq = {}".format(self.T_flags[0], self.T_flags[1], self.T_flags[2]))
 
         if self.T_flags[1]:
@@ -58,7 +66,7 @@ class MGreedyAlgorithm_V2(BaseMinMaxAlgorithm):
         self.get_target_value()
         # self.result_info()
 
-        self.DEBUG("max_delay = {}".format(self.max_delay))
+        self.DEBUG("avg_delay = {}".format(self.avg_delay))
         self.DEBUG("final_cost = {}".format(self.final_avg_cost))
         self.DEBUG("target_value = {}".format(self.target_value))
         self.DEBUG("running_time = {}".format(self.running_time))
@@ -83,9 +91,9 @@ class MGreedyAlgorithm_V2(BaseMinMaxAlgorithm):
                                                                                                         site.service_rate_r,
                                                                                                         sigma=self.env.eta * site.price_r)
 
-        max_delay = math.inf
+        avg_delay = math.inf
         while len(self.selected_sites) < self.M:
-            self.DEBUG("max_delay = {}".format(max_delay))
+            self.DEBUG("avg_delay = {}".format(avg_delay))
             best_assignment = None          # 本轮的最佳assignment
             s_star = None
             for s in self.candidate_sites:
@@ -95,16 +103,16 @@ class MGreedyAlgorithm_V2(BaseMinMaxAlgorithm):
                     if temp_assignment[u] is None or self.env.tx_user_node[u][assign] > self.env.tx_user_node[u][s]:
                         temp_assignment[u] = s
 
-                # 计算 max-T
-                cur_max_delay, _ = self.compute_max_delay(temp_assignment)
+                # 计算 avg-T
+                cur_avg_delay = self.compute_avg_delay(temp_assignment)
 
-                if cur_max_delay < max_delay:
-                    max_delay = cur_max_delay
+                if cur_avg_delay < avg_delay:
+                    avg_delay = cur_avg_delay
                     best_assignment = copy.deepcopy(temp_assignment)
                     s_star = s
 
             if s_star is not None:
-                # print("s_star = {}".format(s_star))
+                self.DEBUG("s_star = {}".format(s_star))
                 self.selected_sites.append(s_star)
                 self.candidate_sites.remove(s_star)
                 self.assignment = copy.deepcopy(best_assignment)
@@ -207,7 +215,7 @@ class MGreedyAlgorithm_V2(BaseMinMaxAlgorithm):
             C_new = x * B / (x - a + a * B)
             delta_t = C_old / ((x - 1 - a) * miu_) - C_new / ((x - a) * miu_)
             delta_t *= 1000
-            if delta_t <= eta_f or (C_new * 1000 <= 1.0):
+            if delta_t <= eta_f:
                 break
 
             C_old = C_new
@@ -215,9 +223,8 @@ class MGreedyAlgorithm_V2(BaseMinMaxAlgorithm):
         x_star = x - 1
         return int(x_star)
 
-    def compute_max_delay(self, assignment: dict):
-        max_delay = -math.inf
-        u_pair = None
+    def compute_avg_delay(self, assignment: dict):
+        total_delay = 0
         for ui in range(self.env.user_num):
             for uj in range(self.env.user_num):
                 delay = 0
@@ -238,10 +245,10 @@ class MGreedyAlgorithm_V2(BaseMinMaxAlgorithm):
                     tq2 = self.tq_serviceR[uj][assignment[uj]]
                     delay += tq1 + tq2
 
-                if delay > max_delay:
-                    max_delay = delay
-                    u_pair = (ui, uj)
-        return max_delay, u_pair
+                total_delay += delay
+
+        avg_delay = total_delay / self.n_2
+        return avg_delay
 
     def check_result(self):
         for u, s in self.assignment.items():
@@ -251,7 +258,7 @@ class MGreedyAlgorithm_V2(BaseMinMaxAlgorithm):
         获取最终的统计信息
     """
     def get_results(self):
-        self.results["max_delay"] = self.max_delay
+        self.results["avg_delay"] = self.avg_delay
         self.results["cost"] = self.final_avg_cost
         self.results["target_value"] = self.target_value
         self.results["running_time"] = self.running_time
@@ -263,30 +270,3 @@ class MGreedyAlgorithm_V2(BaseMinMaxAlgorithm):
     def DEBUG(self, info: str):
         if self.debug_flag:
             print(info)
-
-if __name__ == '__main__':
-    from env.environment2 import Environment
-    from configuration.config import config as conf
-
-    import random
-
-    env_seed = 99497
-    print("env_seed: ", env_seed)
-
-    num_user = 50
-
-    sim_times = 1
-    for sim_id in range(sim_times):
-        print("========================= iteration {} ============================".format(sim_id + 1))
-        u_seed = random.randint(0, 10000000000)
-        # u_seed = 92238814
-
-        print("user_seed = {}".format(u_seed))
-
-        print("------------- M-Greedy-V2 ------------------------")
-        env = Environment(conf, env_seed)
-        env.reset(num_user=num_user, user_seed=u_seed)
-        m_greedy_alg_v2 = MGreedyAlgorithm_V2(env, max_t_compositions=0b111)
-        m_greedy_alg_v2.debug_flag = True
-        m_greedy_alg_v2.run()
-        print(m_greedy_alg_v2.get_results())

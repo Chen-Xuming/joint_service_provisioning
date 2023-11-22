@@ -15,6 +15,7 @@ from datetime import datetime
 from min_avg.nearest import NearestAlgorithm
 from min_avg.modify_assignment import ModifyAssignmentAlgorithm
 from min_avg.modify_assignment_v2 import ModifyAssignmentAlgorithm as ModifyAssignmentAlgorithm_V2
+from min_avg.greedy_server_provisioning import GreedyServerProvisioningAlgorithm
 from min_avg.min_avg_ours import MinAvgOurs
 
 from configuration.config import config as conf
@@ -22,8 +23,8 @@ from configuration.config import config as conf
 print("Script started at {}.".format(datetime.now()))
 
 """ 创建文件夹 """
-description = "min-avg-ma-3kinds"        # fixme
-res_dir = "../../result/min_avg/11-14_eta{}_{}".format(conf["eta"], description)
+description = "min-avg-gsp"        # fixme
+res_dir = "../../result/min_avg/11-22_eta{}_{}".format(conf["eta"], description)
 if not os.path.exists(res_dir):
     os.makedirs(res_dir)
 
@@ -43,7 +44,7 @@ simulation_times_each_num_user = 20
 
 # algorithms = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
 # algorithms = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
-algorithms = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
+algorithms = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "GSP", "Ours"]
 
 
 do_RA = True
@@ -120,6 +121,13 @@ for num_user in range(user_range[0], user_range[1] + user_range_step, user_range
                 ma3_alg = ModifyAssignmentAlgorithm_V2(env, t_compositions=0b111)
                 ma3_alg.run()
                 save_result_to_dict(num_user, sim_id_str, alg_name, ma3_alg)
+
+            if alg_name == "GSP":
+                env = Environment(conf, env_seed)
+                env.reset(num_user=num_user, user_seed=user_seed)
+                gsp_alg = GreedyServerProvisioningAlgorithm(env, avg_t_compositions=0b111)
+                gsp_alg.run()
+                save_result_to_dict(num_user, sim_id_str, alg_name, gsp_alg)
 
             if alg_name == "Ours":
                 env = Environment(conf, env_seed)

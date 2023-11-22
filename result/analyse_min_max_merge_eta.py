@@ -146,7 +146,7 @@ def get_offloading_ratio(res_dict):
     return res
 
 if __name__ == '__main__':
-    file_name = "min_max/11-12_eta{}_min-max-mgreedy-3kinds"
+    file_name = "min_max/11-15_eta{}_min-max-mgreedy-3kinds"
     raw_result = process_data(file_name)
     # print(raw_result)
 

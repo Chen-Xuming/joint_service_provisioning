@@ -183,7 +183,7 @@ class MinAvgOurs(BaseMinAvgAlgorithm):
             C_new = x * B / (x - a + a * B)
             delta_t = C_old / ((x - 1 - a) * miu_) - C_new / ((x - a) * miu_)
             delta_t *= 1000
-            if delta_t <= eta_f or (C_new * 1000 <= 1.0):       # fixme !
+            if delta_t <= eta_f:
                 break
 
             C_old = C_new

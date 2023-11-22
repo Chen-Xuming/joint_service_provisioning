@@ -78,6 +78,7 @@ class ModifyAssignmentAlgorithm(BaseMinAvgAlgorithm):
 
                 # 重新 assign
                 self.assignments[c_star] = s_star
+                self.DEBUG("[modify] user {}: site{} --> site{}".format(c_star, sa_cstar, s_star))
 
             else:
                 break
@@ -215,7 +216,7 @@ if __name__ == "__main__":
     # u_seed = 4932794917
     print("user_seed = {}".format(u_seed))
 
-    env_seed = 58972
+    env_seed = 99497
     print("env_seed: ", env_seed)
 
     num_user = 40
@@ -223,8 +224,9 @@ if __name__ == "__main__":
     print("=========================== VERSION 1 ===============================")
     env = Environment(conf, env_seed)
     env.reset(num_user=num_user, user_seed=u_seed)
-    nearest_alg = NearestAlgorithm(env, consider_cost_tq=False, stable_only=False)
+    nearest_alg = NearestAlgorithm(env)
     nearest_alg.run()
-    ma1 = ModifyAssignmentAlgorithm(env, consider_cost_tq=False, stable_only=False)
+    ma1 = ModifyAssignmentAlgorithm(env)
+    ma1.debug_flag = True
     ma1.run()
     print(ma1.avg_delay, ma1.final_avg_cost, ma1.target_value)
