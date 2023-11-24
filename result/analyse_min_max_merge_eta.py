@@ -7,8 +7,8 @@ import numpy as np
 import os
 
 fontsize = 20
-linewidth = 2
-markersize = 8
+linewidth = 3
+markersize = 10
 plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
 fontsize_legend = 20
 # color_list = ['#2878b5',  '#F28522', '#58B272', '#FF1F5B', '#991a4e', '#1f77b4', '#A6761D', '#009ADE', '#AF58BA']
@@ -17,11 +17,14 @@ color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
 
 marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 
+figure_size = (10, 10)
+dpi = 60
+
 # algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
 algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
+algorithm_name_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
 
-
-etas = [0, 0.25, 0.5, 0.75, 1.0]    # fixme
+etas = [0.25, 0.5, 0.75, 1.0]
 
 user_range = (40, 100)
 user_step = 10
@@ -145,6 +148,45 @@ def get_offloading_ratio(res_dict):
             res[eta][alg] = [local_count, common_count, total, round(local_count/total*100, 1), round(common_count/total*100, 1)]
     return res
 
+def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="Ours", compared_algo="M-Greedy-V2(Tx+Tp+Tq)"):
+    plt.figure(figsize=figure_size, dpi=dpi)
+
+    y_label = ""
+    if attribution == "target_value":
+        y_label = "Weighted Sum of Maximum\nLatency and Cost"
+    elif attribution == "max_delay":
+        y_label = "Maximum Interaction Latency (ms)"
+    elif attribution == "cost":
+        y_label = "Average Cost"
+    plt.ylabel(ylabel=y_label, fontsize=fontsize+10, labelpad=10)
+    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
+    plt.grid(linestyle='--')
+    plt.tight_layout()
+
+    x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
+    plt.xticks(ticks=x, fontsize=fontsize + 8)
+    plt.yticks(fontsize=fontsize + 8)
+
+    for idx, eta_ in enumerate(etas):
+        eta_data = res_dict[eta_]
+
+        plt.plot(x,
+                 eta_data[our_algo][attribution],
+                 label=algorithm_name_in_fig[algorithm_list.index(our_algo)],
+                 color=color_list[idx],
+                 marker=marker_list[idx])
+        plt.plot(x,
+                 eta_data[compared_algo][attribution],
+                 label=algorithm_name_in_fig[algorithm_list.index(compared_algo)],
+                 color=color_list[idx],
+                 marker=marker_list[idx],
+                 linestyle="--")
+
+    leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
+    leg.set_draggable(state=True)
+    plt.show()
+
+
 if __name__ == '__main__':
     file_name = "min_max/11-15_eta{}_min-max-mgreedy-3kinds"
     raw_result = process_data(file_name)
@@ -159,7 +201,12 @@ if __name__ == '__main__':
     # avg_cost_reduction_ratios = get_reduction_ratio(raw_result, "cost")
     # draw_reduction_ratio(avg_cost_reduction_ratios, "avg_cost")
 
-    get_and_draw_all_reduction_ratios(raw_result)
+    # get_and_draw_all_reduction_ratios(raw_result)
+    #
+    # offloading_distribution = get_offloading_ratio(raw_result)
+    # print(offloading_distribution)
 
-    offloading_distribution = get_offloading_ratio(raw_result)
-    print(offloading_distribution)
+    draw_merged_eta_for_some_attribution(raw_result, "target_value")
+    draw_merged_eta_for_some_attribution(raw_result, "max_delay")
+    draw_merged_eta_for_some_attribution(raw_result, "cost")
+

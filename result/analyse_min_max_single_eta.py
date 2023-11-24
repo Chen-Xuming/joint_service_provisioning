@@ -7,8 +7,8 @@ import numpy as np
 import os
 
 fontsize = 20
-linewidth = 2
-markersize = 8
+linewidth = 3
+markersize = 10
 plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
 fontsize_legend = 20
 # color_list = ['#2878b5',  '#F28522', '#58B272', '#FF1F5B', '#991a4e', '#1f77b4', '#A6761D', '#009ADE', '#AF58BA']
@@ -16,7 +16,10 @@ fontsize_legend = 20
 color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
 # color_list = ['#002c53', '#9c403d', '#8983BF', '#58B272', '#f28522', '#009ade', '#ff1f5b']
 
-marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
+marker_list = ['d', '^', 'X', 'o', 's', 'v', 'P',  '*','>','<','x']
+
+figure_size = (10, 10)
+dpi = 60
 
 # algorithm_list = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
 # algorithm_in_fig = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
@@ -126,70 +129,75 @@ def process_data(dir_path):
     return final_data
 
 def draw_max_delay(data: dict):
-    plt.figure(figsize=(5, 5))
-    plt.ylabel("Maximum Interaction Latency (ms)", fontsize=fontsize+3)
-    plt.xlabel("Number of Users", fontsize=fontsize+3)
+    plt.figure(figsize=figure_size, dpi=dpi)
+    plt.ylabel("Maximum Interaction Latency (ms)", fontsize=fontsize+10, labelpad=10)
+    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
-    plt.xticks(ticks=x)
+    plt.xticks(ticks=x, fontsize=fontsize+8)
+    plt.yticks(fontsize=fontsize+8)
 
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["max_delay"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    leg = plt.legend(fontsize=fontsize_legend, loc='best')
+    leg = plt.legend(fontsize=fontsize_legend+2, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
 def draw_avg_cost(data: dict):
-    plt.figure()
-    plt.ylabel("Average Cost")
-    plt.xlabel("Number of Users")
+    plt.figure(figsize=figure_size, dpi=dpi)
+    plt.ylabel("Average Cost", fontsize=fontsize+10, labelpad=10)
+    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
-    plt.xticks(ticks=x)
+    plt.xticks(ticks=x, fontsize=fontsize + 8)
+    y = [i for i in range(75, 350+25, 25)]
+    plt.yticks(ticks=y, fontsize=fontsize + 8)
 
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["cost"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    leg = plt.legend(fontsize=fontsize_legend, loc='best')
+    leg = plt.legend(fontsize=fontsize_legend+2, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
 def draw_target_value(data: dict):
-    plt.figure()
-    plt.ylabel("Weighted Sum of Maximum\nLatency and Cost")
-    plt.xlabel("Number of Users")
+    plt.figure(figsize=figure_size, dpi=dpi)
+    plt.ylabel("Weighted Sum of Maximum\nLatency and Cost", fontsize=fontsize+10, labelpad=10)
+    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
-    plt.xticks(ticks=x)
+    plt.xticks(ticks=x, fontsize=fontsize + 8)
+    plt.yticks(fontsize=fontsize + 8)
 
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["target_value"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    leg = plt.legend(fontsize=fontsize_legend, loc='best')
+    leg = plt.legend(fontsize=fontsize_legend+2, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
 def draw_running_time(data: dict):
-    plt.figure()
-    plt.ylabel("Weighted Sum of Maximum\nLatency and Cost")
-    plt.xlabel("Number of Users")
+    plt.figure(figsize=figure_size, dpi=dpi)
+    plt.ylabel("Running Time (s)", fontsize=fontsize+10, labelpad=10)
+    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
-    plt.xticks(ticks=x)
+    plt.xticks(ticks=x, fontsize=fontsize + 8)
+    plt.yticks(fontsize=fontsize + 8)
 
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["running_time"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    leg = plt.legend(fontsize=fontsize_legend, loc='best')
+    leg = plt.legend(fontsize=fontsize_legend+2, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
@@ -234,12 +242,12 @@ def draw_figures_shared_legend(data: dict):
     plt.show()
 
 if __name__ == '__main__':
-    eta = 0
+    eta = 0.5
     if eta == 0:
         algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "Ours"]
         algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
 
-    raw_data_path = "min_max/11-22_eta{}_min-max-gsp".format(eta)
+    raw_data_path = "min_max/11-15_eta{}_min-max-mgreedy-3kinds".format(eta)
     res_dict = process_data(raw_data_path)
     # print(res_dict)
 
@@ -252,4 +260,7 @@ if __name__ == '__main__':
     if eta == 0:
         draw_max_delay(res_dict)
     else:
-        draw_figures_shared_legend(res_dict)
+        # draw_figures_shared_legend(res_dict)
+        draw_max_delay(res_dict)
+        draw_avg_cost(res_dict)
+        draw_target_value(res_dict)

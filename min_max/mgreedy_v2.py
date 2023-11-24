@@ -104,7 +104,7 @@ class MGreedyAlgorithm_V2(BaseMinMaxAlgorithm):
                     s_star = s
 
             if s_star is not None:
-                # print("s_star = {}".format(s_star))
+                self.DEBUG("s_star = {}".format(s_star))
                 self.selected_sites.append(s_star)
                 self.candidate_sites.remove(s_star)
                 self.assignment = copy.deepcopy(best_assignment)
@@ -273,13 +273,13 @@ if __name__ == '__main__':
     env_seed = 99497
     print("env_seed: ", env_seed)
 
-    num_user = 50
+    num_user = 40
 
     sim_times = 1
     for sim_id in range(sim_times):
         print("========================= iteration {} ============================".format(sim_id + 1))
-        u_seed = random.randint(0, 10000000000)
-        # u_seed = 92238814
+        # u_seed = random.randint(0, 10000000000)
+        u_seed = 57418825
 
         print("user_seed = {}".format(u_seed))
 
@@ -290,3 +290,4 @@ if __name__ == '__main__':
         m_greedy_alg_v2.debug_flag = True
         m_greedy_alg_v2.run()
         print(m_greedy_alg_v2.get_results())
+        m_greedy_alg_v2.result_info()

@@ -67,7 +67,7 @@ class MGreedyAlgorithm(BaseMinMaxAlgorithm):
                     s_star = s
 
             if s_star is not None:
-                # print("s_star = {}".format(s_star))
+                self.DEBUG("s_star = {}".format(s_star))
                 self.selected_sites.append(s_star)
                 self.candidate_sites.remove(s_star)
                 self.assignment = copy.deepcopy(best_assignment)
@@ -189,23 +189,23 @@ if __name__ == "__main__":
 
     num_user = 50
 
-    print("----------------------------------------------------------")
-    env = Environment(conf, env_seed)
-    env.reset(num_user=num_user, user_seed=u_seed)
-    mg = MGreedyAlgorithm(env)
-    mg.debug_flag = True
-    mg.M = 4
-    mg.run()
-    print(mg.get_results())
-
-    print("----------------------------------------------------------")
-    env = Environment(conf, env_seed)
-    env.reset(num_user=num_user, user_seed=u_seed)
-    mg = MGreedyAlgorithm(env)
-    mg.debug_flag = True
-    mg.M = 8
-    mg.run()
-    print(mg.get_results())
+    # print("----------------------------------------------------------")
+    # env = Environment(conf, env_seed)
+    # env.reset(num_user=num_user, user_seed=u_seed)
+    # mg = MGreedyAlgorithm(env)
+    # mg.debug_flag = True
+    # mg.M = 4
+    # mg.run()
+    # print(mg.get_results())
+    #
+    # print("----------------------------------------------------------")
+    # env = Environment(conf, env_seed)
+    # env.reset(num_user=num_user, user_seed=u_seed)
+    # mg = MGreedyAlgorithm(env)
+    # mg.debug_flag = True
+    # mg.M = 8
+    # mg.run()
+    # print(mg.get_results())
 
     print("----------------------------------------------------------")
     env = Environment(conf, env_seed)
@@ -215,3 +215,4 @@ if __name__ == "__main__":
     mg.M = mg.env.site_num
     mg.run()
     print(mg.get_results())
+    mg.result_info()

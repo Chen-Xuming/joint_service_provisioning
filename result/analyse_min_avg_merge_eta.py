@@ -12,19 +12,22 @@ markersize = 10
 plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
 fontsize_legend = 20
 # color_list = ['#2878b5',  '#F28522', '#58B272', '#FF1F5B', '#991a4e', '#1f77b4', '#A6761D', '#009ADE', '#AF58BA']
-# color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
-color_list = ['#58B272', '#009ade', '#ff1f5b']
+color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
+# color_list = ['#58B272', '#009ade', '#ff1f5b']
 
 # color_list = ['#002c53', '#9c403d', '#8983BF', '#58B272', '#f28522', '#009ade', '#ff1f5b']
 
 # marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 marker_list = ['d', 'X', 'o', '^', 's', 'v', 'P',  '*','>','<','x']
 
+figure_size = (10, 10)
+dpi = 60
+
 algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
 # algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "GSP", "Ours"]
-# etas = [0, 0.25, 0.5, 0.75, 1.0]    # fixme
+etas = [0, 0.25, 0.5, 0.75, 1.0]    # fixme
 
-etas = [0.5, 0.75, 1.0]    # fixme
+# etas = [0.5, 0.75, 1.0]    # fixme
 
 
 user_range = (40, 100)
@@ -62,7 +65,7 @@ def get_reduction_ratio(res_dict, attribute: str, original_algorithm="Modify-Ass
     return reduction_ratios
 
 def draw_reduction_ratio(reduction_ratios, attribute: str):
-    plt.figure(figsize=(10, 10), dpi=100)
+    plt.figure(figsize=figure_size, dpi=dpi)
 
     y_label = ""
     if attribute == "target_value":
@@ -84,9 +87,9 @@ def draw_reduction_ratio(reduction_ratios, attribute: str):
     if attribute == "target_value":
         y = [i for i in range(22, 44+2, 2)]
         plt.yticks(y)
-    # if attribute == "avg_delay":
-    #     y = [i for i in range(0, 8+1, 1)]
-    #     plt.yticks(y)
+    if attribute == "cost":
+        y = [i for i in range(46, 57, 1)]
+        plt.yticks(y)
 
     idx = 0
     for eta, ratios in reduction_ratios.items():
@@ -165,7 +168,7 @@ def get_offloading_ratio(res_dict):
     return res
 
 if __name__ == '__main__':
-    file_name = "min_avg/11-14_eta{}_min-avg-ma-3kinds"
+    file_name = "min_avg/11-22_eta{}_min-avg-gsp"
     raw_result = process_data(file_name)
     # print(raw_result)
 

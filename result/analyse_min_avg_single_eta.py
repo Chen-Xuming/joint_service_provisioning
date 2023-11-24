@@ -21,6 +21,8 @@ color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
 
 marker_list = ['d', '^', 'X', 'o', 's', 'v', 'P',  '*','>','<','x']
 
+figure_size = (10, 10)
+dpi = 60
 
 algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
 algorithm_in_fig = ["Nearest", "Modify-Assignment", "Modify-Assignment-V2", "Min-Avg"]
@@ -126,7 +128,7 @@ def process_data(dir_path):
     return final_data
 
 def draw_avg_delay(data: dict):
-    plt.figure(figsize=(10, 10), dpi=100)
+    plt.figure(figsize=figure_size, dpi=dpi)
     plt.ylabel("Average Interaction Latency (ms)", fontsize=fontsize+10, labelpad=10)
     plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
@@ -144,7 +146,7 @@ def draw_avg_delay(data: dict):
     plt.show()
 
 def draw_avg_cost(data: dict):
-    plt.figure(figsize=(10, 10), dpi=100)
+    plt.figure(figsize=figure_size, dpi=dpi)
     plt.ylabel("Average Cost", fontsize=fontsize+10, labelpad=10)
     plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
@@ -165,7 +167,7 @@ def draw_avg_cost(data: dict):
     plt.show()
 
 def draw_target_value(data: dict):
-    plt.figure(figsize=(10, 10), dpi=100)
+    plt.figure(figsize=figure_size, dpi=dpi)
     plt.ylabel("Weighted Sum of Average\nLatency and Cost", fontsize=fontsize+10, labelpad=10)
     plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
@@ -183,7 +185,7 @@ def draw_target_value(data: dict):
     plt.show()
 
 def draw_running_time(data: dict):
-    plt.figure()
+    plt.figure(figsize=figure_size, dpi=dpi)
     plt.ylabel("Average Running Time (s)")
     plt.xlabel("Number of Users")
     plt.grid(linestyle='--')
@@ -240,7 +242,7 @@ def draw_figures_shared_legend(data: dict):
     plt.show()
 
 if __name__ == '__main__':
-    eta = 0.5
+    eta = 0
     if eta == 0:
         algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
         algorithm_in_fig = ["Nearest", "Modify-Assignment", "Modify-Assignment-V2", "Min-Avg"]
