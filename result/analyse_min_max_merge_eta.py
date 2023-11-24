@@ -1,4 +1,5 @@
 from analyse_min_max_single_eta import process_data as process_data_for_single_data
+from analyse_min_max_single_eta import process_data_v2
 
 import simplejson as json
 from matplotlib import pyplot as plt
@@ -24,16 +25,19 @@ dpi = 60
 algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
 algorithm_name_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
 
-etas = [0.25, 0.5, 0.75, 1.0]
+etas = [0.5, 0.75, 1.0]
 
 user_range = (40, 100)
 user_step = 10
 
-def process_data(file_base_name):
+def process_data(file_base_name, need_error_bar=False):
     res = {}
     for eta_ in etas:
         file = file_base_name.format(eta_)
-        res[eta_] = process_data_for_single_data(file)
+        if not need_error_bar:
+            res[eta_] = process_data_for_single_data(file)
+        else:
+            res[eta_] = process_data_v2(file)
     return res
 
 """
@@ -172,12 +176,12 @@ def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="O
 
         plt.plot(x,
                  eta_data[our_algo][attribution],
-                 label=algorithm_name_in_fig[algorithm_list.index(our_algo)],
+                 label=algorithm_name_in_fig[algorithm_list.index(our_algo)] + r'($\eta={}$)'.format(eta_),
                  color=color_list[idx],
                  marker=marker_list[idx])
         plt.plot(x,
                  eta_data[compared_algo][attribution],
-                 label=algorithm_name_in_fig[algorithm_list.index(compared_algo)],
+                 label=algorithm_name_in_fig[algorithm_list.index(compared_algo)] + r'($\eta={}$)'.format(eta_),
                  color=color_list[idx],
                  marker=marker_list[idx],
                  linestyle="--")
@@ -186,10 +190,61 @@ def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="O
     leg.set_draggable(state=True)
     plt.show()
 
+def draw_merged_eta_for_some_attribution_with_error_bar(res_dict, attribution: str, our_algo="Ours", compared_algo="M-Greedy-V2(Tx+Tp+Tq)"):
+    plt.figure(figsize=figure_size, dpi=dpi)
+
+    y_label = ""
+    if attribution == "target_value":
+        y_label = "Weighted Sum of Maximum\nLatency and Cost"
+    elif attribution == "max_delay":
+        y_label = "Maximum Interaction Latency (ms)"
+    elif attribution == "cost":
+        y_label = "Average Cost"
+    plt.ylabel(ylabel=y_label, fontsize=fontsize+10, labelpad=10)
+    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
+    plt.grid(linestyle='--')
+    plt.tight_layout()
+
+    x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
+    plt.xticks(ticks=x, fontsize=fontsize + 8)
+    plt.yticks(fontsize=fontsize + 8)
+
+    for idx, eta_ in enumerate(etas):
+        eta_data = res_dict[eta_]
+
+        y1 = [d[0] for d in eta_data[our_algo][attribution]]
+        error_range = [[], []]
+        for i_, range_ in enumerate(eta_data[our_algo][attribution]):
+            error_range[0].append(y1[i_] - range_[1][0])
+            error_range[1].append(range_[1][1] - y1[i_])
+        # plt.plot(x,
+        #          y1,
+        #          label=algorithm_name_in_fig[algorithm_list.index(our_algo)] + r'($\eta={}$)'.format(eta_),
+        #          color=color_list[idx],
+        #          marker=marker_list[idx])
+        plt.errorbar(x, y1, yerr=error_range, elinewidth=2, capsize=4)
+
+        y2 = [d[0] for d in eta_data[compared_algo][attribution]]
+        error_range = [[], []]
+        for i_, range_ in enumerate(eta_data[compared_algo][attribution]):
+            error_range[0].append(y2[i_] - range_[1][0])
+            error_range[1].append(range_[1][1] - y2[i_])
+        # plt.plot(x,
+        #          y2,
+        #          label=algorithm_name_in_fig[algorithm_list.index(compared_algo)] + r'($\eta={}$)'.format(eta_),
+        #          color=color_list[idx],
+        #          marker=marker_list[idx],
+        #          linestyle="--")
+        plt.errorbar(x, y2, yerr=error_range, elinewidth=2, capsize=4)
+
+    leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
+    leg.set_draggable(state=True)
+    plt.show()
+
 
 if __name__ == '__main__':
     file_name = "min_max/11-15_eta{}_min-max-mgreedy-3kinds"
-    raw_result = process_data(file_name)
+    # raw_result = process_data(file_name)
     # print(raw_result)
 
     # target_value_reduction_ratios = get_reduction_ratio(raw_result, "target_value")
@@ -206,7 +261,12 @@ if __name__ == '__main__':
     # offloading_distribution = get_offloading_ratio(raw_result)
     # print(offloading_distribution)
 
-    draw_merged_eta_for_some_attribution(raw_result, "target_value")
-    draw_merged_eta_for_some_attribution(raw_result, "max_delay")
-    draw_merged_eta_for_some_attribution(raw_result, "cost")
+    # raw_result = process_data(file_name)
+    # draw_merged_eta_for_some_attribution(raw_result, "target_value")
+    # draw_merged_eta_for_some_attribution(raw_result, "max_delay")
+    # draw_merged_eta_for_some_attribution(raw_result, "cost")
 
+    raw_result = process_data(file_name, True)
+    draw_merged_eta_for_some_attribution_with_error_bar(raw_result, "target_value")
+    draw_merged_eta_for_some_attribution_with_error_bar(raw_result, "max_delay")
+    draw_merged_eta_for_some_attribution_with_error_bar(raw_result, "cost")

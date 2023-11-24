@@ -26,7 +26,7 @@ print("Script started at {}.".format(datetime.now()))
 
 """ 创建文件夹 """
 description = "min-max-mgreedy-3kinds"        # fixme
-res_dir = "../../result/min_max/11-15_eta{}_{}".format(conf["eta"], description)
+res_dir = "../../result/min_max/11-24_eta{}_{}".format(conf["eta"], description)
 if not os.path.exists(res_dir):
     os.makedirs(res_dir)
 
@@ -34,19 +34,19 @@ print("res_dir = {}".format(res_dir))
 
 env_seed = 99497
 
-simulation_no = 4  # 文件号
+simulation_no = 29  # 文件号
 print("simulation_no = {}".format(simulation_no))
 
 # 用户数及测试次数
 user_range = (40, 100)
 user_range_step = 10
-simulation_times_each_num_user = 50
+simulation_times_each_num_user = 7
 
 # algorithms = ["Nearest", "Modify-Assignment", "M-Greedy", "Shortest-Path", "Shortest-Path-V2"]
 
 # algorithms = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
 # algorithms = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
-algorithms = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "M-Greedy-V2(Tx+Tp+Tq)", "Min-Avg", "Max-First", "Ours"]
+algorithms = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
 
 
 do_RA = True

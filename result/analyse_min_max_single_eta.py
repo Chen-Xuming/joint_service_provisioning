@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import math
 import numpy as np
 import os
+from scipy import stats
 
 fontsize = 20
 linewidth = 3
@@ -105,6 +106,96 @@ def process_data(dir_path):
         final_data = {
             "Nearest": {
                 "max_delay": [...],     # 不同用户数下的平均最大时延
+                ..
+            },
+            ...
+        }
+    """
+    final_data = {}
+    for algo in algorithm_list:
+        final_data[algo] = {
+            "max_delay": [],
+            "cost": [],
+            "target_value": [],
+            "running_time": [],
+            "local_count": [],
+            "common_count": []
+        }
+    for u, u_data in data.items():
+        for algo, algo_data in u_data.items():
+            if algo in algorithm_list:
+                for attr, attr_value in algo_data.items():
+                    final_data[algo][attr].append(attr_value)
+
+    return final_data
+
+# 结果包含95%置信区间
+def process_data_v2(dir_path):
+    json_file_list = get_json_file_list(dir_path)
+
+    """
+        data = {
+            40: {
+                "Nearest": {
+                    "max_delay": 100,
+                    "cost:: 101,
+                    ...
+                },
+                ...
+            },
+            ...
+        }
+    """
+    data = {}
+    for u in range(user_range[0], user_range[1] + user_step, user_step):
+        data[u] = {}
+        for algo in algorithm_list:
+            data[u][algo] = {
+                "max_delay": [],
+                "cost": [],
+                "target_value": [],
+                "running_time": [],
+                "local_count": [],
+                "common_count": []
+            }
+
+    """ 逐个处理json文件，读取数据到data字典里 """
+    for file in json_file_list:
+        print(file)
+        raw_data = json.load(open(file))
+
+        for u_str, u_data in raw_data.items():
+            user_num = int(u_str)
+            for sim_id_str, sim_data in u_data.items():
+                for algo in algorithm_list:
+                    algo_data = sim_data[algo]
+
+                    for attr, attr_val in algo_data.items():
+                        if attr in data[user_num][algo].keys():
+                            data[user_num][algo][attr].append(attr_val)
+
+    """ 对 data 中的每个数组求平均值、置信区间 """
+    for u in range(user_range[0], user_range[1] + user_step, user_step):
+        for algo in algorithm_list:
+            for attr, attr_array in data[u][algo].items():
+                if attr in ["target_value", "max_delay", "cost"]:
+                    mean_value = np.mean(data[u][algo][attr])
+                    confidence_interval = stats.t.interval(0.99, len(data[u][algo][attr])-1, loc=mean_value, scale=stats.sem(data[u][algo][attr]))
+                    data[u][algo][attr] = [mean_value, list(confidence_interval)]
+                    if attr == "max_delay":
+                        data[u][algo][attr][1][0] *= 1000
+                        data[u][algo][attr][1][1] *= 1000
+                else:
+                    data[u][algo][attr] = np.mean(data[u][algo][attr])
+
+            # 单位转换
+            data[u][algo]["max_delay"][0] = data[u][algo]["max_delay"][0] * 1000        # ms
+            data[u][algo]["running_time"] = data[u][algo]["running_time"] / 1000        # s
+
+    """
+        final_data = {
+            "Nearest": {
+                "max_delay": [...],     # 不同用户数下的平均最大时延、置信区间
                 ..
             },
             ...
@@ -248,19 +339,23 @@ if __name__ == '__main__':
         algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
 
     raw_data_path = "min_max/11-15_eta{}_min-max-mgreedy-3kinds".format(eta)
-    res_dict = process_data(raw_data_path)
-    # print(res_dict)
+    # raw_data_path = "min_max/11-24_eta{}_min-max-mgreedy-3kinds".format(eta)
+    # res_dict = process_data(raw_data_path)
+    # # print(res_dict)
+    #
+    # # draw_max_delay(res_dict)
+    # # draw_avg_cost(res_dict)
+    # # draw_target_value(res_dict)
+    # # draw_running_time(res_dict)
+    # # draw_figures_shared_legend(res_dict)
+    #
+    # if eta == 0:
+    #     draw_max_delay(res_dict)
+    # else:
+    #     # draw_figures_shared_legend(res_dict)
+    #     draw_max_delay(res_dict)
+    #     draw_avg_cost(res_dict)
+    #     draw_target_value(res_dict)
 
-    # draw_max_delay(res_dict)
-    # draw_avg_cost(res_dict)
-    # draw_target_value(res_dict)
-    # draw_running_time(res_dict)
-    # draw_figures_shared_legend(res_dict)
-
-    if eta == 0:
-        draw_max_delay(res_dict)
-    else:
-        # draw_figures_shared_legend(res_dict)
-        draw_max_delay(res_dict)
-        draw_avg_cost(res_dict)
-        draw_target_value(res_dict)
+    res_dict = process_data_v2(raw_data_path)
+    print(res_dict)
