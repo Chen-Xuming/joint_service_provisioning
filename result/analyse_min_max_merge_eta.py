@@ -7,19 +7,24 @@ import math
 import numpy as np
 import os
 
+from collections import OrderedDict
+
 fontsize = 20
 linewidth = 3
 markersize = 10
 plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
 fontsize_legend = 20
 # color_list = ['#2878b5',  '#F28522', '#58B272', '#FF1F5B', '#991a4e', '#1f77b4', '#A6761D', '#009ADE', '#AF58BA']
-color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
+# color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
 # color_list = ['#002c53', '#9c403d', '#8983BF', '#58B272', '#f28522', '#009ade', '#ff1f5b']
+
+# color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b', '#002c53', '#9c403d']
+color_list = ['#ff1f5b', '#009ade', '#f28522', '#58B272', '#B22222', '#4B65AF']
 
 marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 
 figure_size = (10, 10)
-dpi = 60
+dpi = 100
 
 # algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
 algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
@@ -171,6 +176,10 @@ def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="O
     plt.xticks(ticks=x, fontsize=fontsize + 8)
     plt.yticks(fontsize=fontsize + 8)
 
+    if attribution == "cost":
+        y_ = [i for i in range(70, 200, 10)]
+        plt.yticks(y_)
+
     for idx, eta_ in enumerate(etas):
         eta_data = res_dict[eta_]
 
@@ -190,6 +199,7 @@ def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="O
     leg.set_draggable(state=True)
     plt.show()
 
+# fixme
 def draw_merged_eta_for_some_attribution_with_error_bar(res_dict, attribution: str, our_algo="Ours", compared_algo="M-Greedy-V2(Tx+Tp+Tq)"):
     plt.figure(figsize=figure_size, dpi=dpi)
 
@@ -217,11 +227,11 @@ def draw_merged_eta_for_some_attribution_with_error_bar(res_dict, attribution: s
         for i_, range_ in enumerate(eta_data[our_algo][attribution]):
             error_range[0].append(y1[i_] - range_[1][0])
             error_range[1].append(range_[1][1] - y1[i_])
-        # plt.plot(x,
-        #          y1,
-        #          label=algorithm_name_in_fig[algorithm_list.index(our_algo)] + r'($\eta={}$)'.format(eta_),
-        #          color=color_list[idx],
-        #          marker=marker_list[idx])
+        plt.plot(x,
+                 y1,
+                 label=algorithm_name_in_fig[algorithm_list.index(our_algo)] + r'($\eta={}$)'.format(eta_),
+                 color=color_list[idx],
+                 marker=marker_list[idx])
         plt.errorbar(x, y1, yerr=error_range, elinewidth=2, capsize=4)
 
         y2 = [d[0] for d in eta_data[compared_algo][attribution]]
@@ -229,23 +239,85 @@ def draw_merged_eta_for_some_attribution_with_error_bar(res_dict, attribution: s
         for i_, range_ in enumerate(eta_data[compared_algo][attribution]):
             error_range[0].append(y2[i_] - range_[1][0])
             error_range[1].append(range_[1][1] - y2[i_])
-        # plt.plot(x,
-        #          y2,
-        #          label=algorithm_name_in_fig[algorithm_list.index(compared_algo)] + r'($\eta={}$)'.format(eta_),
-        #          color=color_list[idx],
-        #          marker=marker_list[idx],
-        #          linestyle="--")
+        plt.plot(x,
+                 y2,
+                 label=algorithm_name_in_fig[algorithm_list.index(compared_algo)] + r'($\eta={}$)'.format(eta_),
+                 color=color_list[idx],
+                 marker=marker_list[idx],
+                 linestyle="--")
         plt.errorbar(x, y2, yerr=error_range, elinewidth=2, capsize=4)
 
     leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
+def draw_histogram_with_error_bar(res_dict, attribution: str, our_algo="Ours", compared_algo="M-Greedy-V2(Tx+Tp+Tq)"):
+    fig_size = (20, 12)
+    plt.figure(figsize=fig_size, dpi=dpi)
+    y_label = ""
+    if attribution == "target_value":
+        y_label = "Weighted Sum of Maximum\nLatency and Cost"
+    elif attribution == "max_delay":
+        y_label = "Maximum Interaction Latency (ms)"
+    elif attribution == "cost":
+        y_label = "Average Cost"
+    plt.ylabel(ylabel=y_label, fontsize=fontsize + 10, labelpad=10)
+    plt.xlabel("Number of Users", fontsize=fontsize + 10, labelpad=10)
+    plt.grid(linestyle='--')
+    plt.tight_layout()
+
+    x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
+    plt.xticks(ticks=x, fontsize=fontsize + 8)
+    plt.yticks(fontsize=fontsize + 8)
+    if attribution == "target_value":
+        plt.ylim([150, 350])
+
+    bar_width = 1.1
+    gap_width = 0.3
+    for idx_, x_ in enumerate(x):
+        n_bar = len(etas) * 2
+        # xs = [x_ + offs*bar_width + bar_width/2 for offs in range(-n_bar//2, n_bar//2+1, 1)]
+        xs = [x_ - 3*bar_width - 2.5*gap_width + bar_width/2]
+        for _ in range(1, n_bar):
+            xs.append(xs[-1] + bar_width + gap_width)
+
+        x_id = 0
+        for eta_ in etas:
+            eta_data = res_dict[eta_]
+
+            y_ = eta_data[our_algo][attribution][idx_][0]
+            error_range = [y_ - [eta_data[our_algo][attribution][idx_][1][0]], [eta_data[our_algo][attribution][idx_][1][1] - y_]]
+            plt.bar(xs[x_id],
+                    y_,
+                    width=bar_width,
+                    label=algorithm_name_in_fig[algorithm_list.index(our_algo)] + r'($\eta={}$)'.format(eta_),
+                    yerr=error_range,
+                    capsize=4,
+                    color=color_list[x_id])
+            x_id += 1
+
+            y_ = eta_data[compared_algo][attribution][idx_][0]
+            error_range = [y_ - [eta_data[compared_algo][attribution][idx_][1][0]], [eta_data[compared_algo][attribution][idx_][1][1] - y_]]
+            plt.bar(x=xs[x_id],
+                    height=y_,
+                    width=bar_width,
+                    label=algorithm_name_in_fig[algorithm_list.index(compared_algo)] + r'($\eta={}$)'.format(eta_),
+                    yerr=error_range,
+                    capsize=4,
+                    color=color_list[x_id])
+            x_id += 1
+
+    handles, labels = plt.gca().get_legend_handles_labels()
+    by_label = OrderedDict(zip(labels, handles))
+    leg = plt.legend(by_label.values(), by_label.keys(), fontsize=fontsize_legend + 2, loc='best')
+    leg.set_draggable(state=True)
+    plt.show()
+
 
 if __name__ == '__main__':
     file_name = "min_max/11-15_eta{}_min-max-mgreedy-3kinds"
-    # raw_result = process_data(file_name)
-    # print(raw_result)
+    raw_result = process_data(file_name)
+    print(raw_result)
 
     # target_value_reduction_ratios = get_reduction_ratio(raw_result, "target_value")
     # draw_reduction_ratio(target_value_reduction_ratios, "target_value")
@@ -261,12 +333,12 @@ if __name__ == '__main__':
     # offloading_distribution = get_offloading_ratio(raw_result)
     # print(offloading_distribution)
 
-    # raw_result = process_data(file_name)
-    # draw_merged_eta_for_some_attribution(raw_result, "target_value")
-    # draw_merged_eta_for_some_attribution(raw_result, "max_delay")
-    # draw_merged_eta_for_some_attribution(raw_result, "cost")
+    raw_result = process_data(file_name)
+    draw_merged_eta_for_some_attribution(raw_result, "target_value")
+    draw_merged_eta_for_some_attribution(raw_result, "max_delay")
+    draw_merged_eta_for_some_attribution(raw_result, "cost")
 
-    raw_result = process_data(file_name, True)
-    draw_merged_eta_for_some_attribution_with_error_bar(raw_result, "target_value")
-    draw_merged_eta_for_some_attribution_with_error_bar(raw_result, "max_delay")
-    draw_merged_eta_for_some_attribution_with_error_bar(raw_result, "cost")
+    # raw_result = process_data(file_name, True)
+    # draw_histogram_with_error_bar(raw_result, "target_value")
+    # draw_histogram_with_error_bar(raw_result, "max_delay")
+    # draw_histogram_with_error_bar(raw_result, "cost")

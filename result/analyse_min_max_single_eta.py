@@ -20,7 +20,7 @@ color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
 marker_list = ['d', '^', 'X', 'o', 's', 'v', 'P',  '*','>','<','x']
 
 figure_size = (10, 10)
-dpi = 60
+dpi = 100
 
 # algorithm_list = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
 # algorithm_in_fig = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
@@ -180,7 +180,7 @@ def process_data_v2(dir_path):
             for attr, attr_array in data[u][algo].items():
                 if attr in ["target_value", "max_delay", "cost"]:
                     mean_value = np.mean(data[u][algo][attr])
-                    confidence_interval = stats.t.interval(0.99, len(data[u][algo][attr])-1, loc=mean_value, scale=stats.sem(data[u][algo][attr]))
+                    confidence_interval = stats.t.interval(0.97, len(data[u][algo][attr])-1, loc=mean_value, scale=stats.sem(data[u][algo][attr]))
                     data[u][algo][attr] = [mean_value, list(confidence_interval)]
                     if attr == "max_delay":
                         data[u][algo][attr][1][0] *= 1000
@@ -333,15 +333,15 @@ def draw_figures_shared_legend(data: dict):
     plt.show()
 
 if __name__ == '__main__':
-    eta = 0.5
+    eta = 0
     if eta == 0:
         algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "Ours"]
         algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
 
     raw_data_path = "min_max/11-15_eta{}_min-max-mgreedy-3kinds".format(eta)
     # raw_data_path = "min_max/11-24_eta{}_min-max-mgreedy-3kinds".format(eta)
-    # res_dict = process_data(raw_data_path)
-    # # print(res_dict)
+    res_dict = process_data(raw_data_path)
+    print(res_dict)
     #
     # # draw_max_delay(res_dict)
     # # draw_avg_cost(res_dict)
@@ -349,13 +349,13 @@ if __name__ == '__main__':
     # # draw_running_time(res_dict)
     # # draw_figures_shared_legend(res_dict)
     #
-    # if eta == 0:
-    #     draw_max_delay(res_dict)
-    # else:
-    #     # draw_figures_shared_legend(res_dict)
-    #     draw_max_delay(res_dict)
-    #     draw_avg_cost(res_dict)
-    #     draw_target_value(res_dict)
+    if eta == 0:
+        draw_max_delay(res_dict)
+    else:
+        # draw_figures_shared_legend(res_dict)
+        draw_max_delay(res_dict)
+        draw_avg_cost(res_dict)
+        draw_target_value(res_dict)
 
-    res_dict = process_data_v2(raw_data_path)
-    print(res_dict)
+    # res_dict = process_data_v2(raw_data_path)
+    # print(res_dict)
