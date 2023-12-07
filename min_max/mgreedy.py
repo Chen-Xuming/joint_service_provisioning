@@ -180,8 +180,8 @@ if __name__ == "__main__":
 
     import random
 
-    u_seed = random.randint(0, 10000000000)
-    # u_seed = 4932794917
+    # u_seed = random.randint(0, 10000000000)
+    u_seed = 4001568127
     print("user_seed = {}".format(u_seed))
 
     env_seed = 99497
@@ -215,4 +215,4 @@ if __name__ == "__main__":
     mg.M = mg.env.site_num
     mg.run()
     print(mg.get_results())
-    mg.result_info()
+    # mg.result_info()

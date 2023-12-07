@@ -15,7 +15,7 @@ print("env_seed: ", env_seed)
 
 num_user = 60
 
-sim_times = 1
+sim_times = 10
 for sim_id in range(sim_times):
     print("========================= iteration {} ============================".format(sim_id + 1))
     u_seed = random.randint(0, 10000000000)
@@ -30,19 +30,19 @@ for sim_id in range(sim_times):
     nearest_alg.run()
     print(nearest_alg.get_results())
 
-    print("------------- Max-First ------------------------")
-    env = Environment(conf, env_seed)
-    env.reset(num_user=num_user, user_seed=u_seed)
-    max_first_alg = StpMaxFirst(env)
-    max_first_alg.run()
-    print(max_first_alg.get_results())
-
-    print("------------- Min-First ------------------------")
-    env = Environment(conf, env_seed)
-    env.reset(num_user=num_user, user_seed=u_seed)
-    min_first_alg = MinAvgForMinMax(env)
-    min_first_alg.run()
-    print(min_first_alg.get_results())
+    # print("------------- Max-First ------------------------")
+    # env = Environment(conf, env_seed)
+    # env.reset(num_user=num_user, user_seed=u_seed)
+    # max_first_alg = StpMaxFirst(env)
+    # max_first_alg.run()
+    # print(max_first_alg.get_results())
+    #
+    # print("------------- Min-First ------------------------")
+    # env = Environment(conf, env_seed)
+    # env.reset(num_user=num_user, user_seed=u_seed)
+    # min_first_alg = MinAvgForMinMax(env)
+    # min_first_alg.run()
+    # print(min_first_alg.get_results())
 
     print("------------- M-Greedy ------------------------")
     env = Environment(conf, env_seed)
@@ -66,11 +66,11 @@ for sim_id in range(sim_times):
     print(m_greedy_alg_v2.get_results())
 
     print("------------- Ours ------------------------")
-    env = Environment(conf, env_seed)
-    env.reset(num_user=num_user, user_seed=u_seed)
-    our_alg = MinMaxOurs_V2(env)
-    our_alg.debug_flag = True
-    our_alg.alpha = alpha_initial_values[conf["eta"]][num_user]
-    our_alg.epsilon = 15
-    our_alg.run()
-    print(our_alg.get_results())
+    # env = Environment(conf, env_seed)
+    # env.reset(num_user=num_user, user_seed=u_seed)
+    # our_alg = MinMaxOurs_V2(env)
+    # our_alg.debug_flag = True
+    # our_alg.alpha = alpha_initial_values[conf["eta"]][num_user]
+    # our_alg.epsilon = 15
+    # our_alg.run()
+    # print(our_alg.get_results())

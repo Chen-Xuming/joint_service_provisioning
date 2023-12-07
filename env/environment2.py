@@ -86,8 +86,8 @@ class Environment:
 
         # 距离变换
         def transform(length):
-            delay = length * 1.8  # fixme
-            return int(delay)
+            delay = length * 1.8
+            return int(delay)           # fixme
 
         num_points = self.common_site_num
 

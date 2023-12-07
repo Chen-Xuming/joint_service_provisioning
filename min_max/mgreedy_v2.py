@@ -279,15 +279,15 @@ if __name__ == '__main__':
     for sim_id in range(sim_times):
         print("========================= iteration {} ============================".format(sim_id + 1))
         # u_seed = random.randint(0, 10000000000)
-        u_seed = 57418825
+        u_seed = 4001568127
 
         print("user_seed = {}".format(u_seed))
 
         print("------------- M-Greedy-V2 ------------------------")
         env = Environment(conf, env_seed)
         env.reset(num_user=num_user, user_seed=u_seed)
-        m_greedy_alg_v2 = MGreedyAlgorithm_V2(env, max_t_compositions=0b111)
+        m_greedy_alg_v2 = MGreedyAlgorithm_V2(env, max_t_compositions=0b110)
         m_greedy_alg_v2.debug_flag = True
         m_greedy_alg_v2.run()
         print(m_greedy_alg_v2.get_results())
-        m_greedy_alg_v2.result_info()
+        # m_greedy_alg_v2.result_info()
