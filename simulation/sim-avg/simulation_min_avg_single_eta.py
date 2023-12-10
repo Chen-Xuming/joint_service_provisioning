@@ -17,14 +17,15 @@ from min_avg.modify_assignment import ModifyAssignmentAlgorithm
 from min_avg.modify_assignment_v2 import ModifyAssignmentAlgorithm as ModifyAssignmentAlgorithm_V2
 from min_avg.greedy_server_provisioning import GreedyServerProvisioningAlgorithm
 from min_avg.min_avg_ours import MinAvgOurs
+from min_avg.min_avg_centralized import MinAvgCentralized
 
 from configuration.config import config as conf
 
 print("Script started at {}.".format(datetime.now()))
 
 """ 创建文件夹 """
-description = "min-avg-gsp"        # fixme
-res_dir = "../../result/min_avg/11-22_eta{}_{}".format(conf["eta"], description)
+description = "min-avg-centralized"        # fixme
+res_dir = "../../result/min_avg/12-8_eta{}_{}".format(conf["eta"], description)
 if not os.path.exists(res_dir):
     os.makedirs(res_dir)
 
@@ -32,20 +33,21 @@ print("res_dir = {}".format(res_dir))
 
 env_seed = 99497
 
-simulation_no = 4  # 文件号
+simulation_no = 0  # 文件号
 print("simulation_no = {}".format(simulation_no))
 
 # 用户数及测试次数
 user_range = (40, 100)
 user_range_step = 10
-simulation_times_each_num_user = 20
+simulation_times_each_num_user = 200
 
 # algorithms = ["Nearest", "Modify-Assignment", "M-Greedy", "Shortest-Path", "Shortest-Path-V2"]
 
 # algorithms = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
 # algorithms = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
-algorithms = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "GSP", "Ours"]
+# algorithms = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "GSP", "Ours"]
 
+algorithms = ["Ours", "Ours_centralized"]
 
 do_RA = True
 stable_only = False
@@ -135,6 +137,13 @@ for num_user in range(user_range[0], user_range[1] + user_range_step, user_range
                 our_alg = MinAvgOurs(env)
                 our_alg.run()
                 save_result_to_dict(num_user, sim_id_str, alg_name, our_alg)
+
+            if alg_name == "Ours_centralized":
+                env = Environment(conf, env_seed)
+                env.reset(num_user=num_user, user_seed=user_seed)
+                our_centralized_alg = MinAvgCentralized(env)
+                our_centralized_alg.run()
+                save_result_to_dict(num_user, sim_id_str, alg_name, our_centralized_alg)
 
         print("-----------------------------------")
         print("num_user: {}, simulation #{}".format(num_user, sim_id))

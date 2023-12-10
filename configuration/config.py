@@ -36,7 +36,7 @@ config = {
     "minmax_price_A_edge": (12, 18),                  # (2, 4)
     "minmax_price_R_edge": (15, 25),                 # (2, 4)
 
-    "eta": 0,
+    "eta": 0.5,
 }
 
 """ alpha 初始参考值 """
@@ -65,43 +65,4 @@ if __name__ == '__main__':
         print("num_user\talpha")
         for nu, alpha in eta_dict.items():
             print("{}\t{}".format(nu, alpha))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

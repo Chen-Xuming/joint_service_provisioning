@@ -8,10 +8,10 @@ import numpy as np
 
 from heapdict import heapdict
 
-class MinAvgOurs(BaseMinAvgAlgorithm):
+class MinAvgCentralized(BaseMinAvgAlgorithm):
     def __init__(self, env, consider_cost_tq=True, stable_only=False, *args, **kwargs):
         BaseMinAvgAlgorithm.__init__(self, env, *args, **kwargs)
-        self.algorithm_name = "min_avg_ours" if "algorithm_name" not in kwargs else kwargs["algorithm_name"]
+        self.algorithm_name = "min_avg_centralized" if "algorithm_name" not in kwargs else kwargs["algorithm_name"]
 
         self.consider_cost_tq = consider_cost_tq
         self.stable_only = stable_only      # 仅当 consider_cost_tq=True 时有效
@@ -31,12 +31,6 @@ class MinAvgOurs(BaseMinAvgAlgorithm):
 
         self.debug_flag = False
 
-        self.build_graph_time = 0
-        self.get_all_stp_time = 0
-        self.get_max_stp_total_running_time = 0
-        self.assign_user_time = 0
-        self.allocation_time = 0
-
     def run(self):
         self.start_time = time()
 
@@ -52,12 +46,6 @@ class MinAvgOurs(BaseMinAvgAlgorithm):
         self.DEBUG("running_time = {}".format(self.running_time))
         self.DEBUG("on_local = {}, on_common = {}".format(self.local_count, self.common_count))
 
-        self.DEBUG("build-graph-time: {}ms".format(self.build_graph_time * 1000))
-        self.DEBUG("get-all-stp-time: {}ms".format(self.get_all_stp_time * 1000))
-        self.DEBUG("assign_user_time: {}ms".format(self.assign_user_time * 1000))
-        self.DEBUG("get-max-stp-running-time: {}ms".format(self.get_max_stp_total_running_time * 1000))
-        self.DEBUG("allocation-time: {}ms".format(self.allocation_time * 1000))
-
     def solve(self):
         self.build_graph()
         self.get_all_stp()
@@ -72,8 +60,6 @@ class MinAvgOurs(BaseMinAvgAlgorithm):
         第四列节点是第一列的拷贝 ---> u4i, i = user_id
     """
     def build_graph(self):
-        start = time()
-
         # 添加节点
         for user in self.env.users:  # type: UserNode
             self.graph.add_node("u1{}".format(user.user_id))
@@ -153,9 +139,6 @@ class MinAvgOurs(BaseMinAvgAlgorithm):
 
         self.reversed_graph = nx.reverse(self.graph, copy=True)
 
-        end = time()
-        self.build_graph_time = end - start
-
     """
         计算一个某个服务的最佳数量
         输入：lambda_ = 到达率，miu_ = 服务率，eta，f = 服务的单价
@@ -188,8 +171,6 @@ class MinAvgOurs(BaseMinAvgAlgorithm):
 
     """ 求所有用户对之间的最短路径 """
     def get_all_stp(self):
-        start = time()
-
         for i in range(self.env.user_num):
             self.shortest_paths["u1{}".format(i)] = dict()
 
@@ -200,111 +181,134 @@ class MinAvgOurs(BaseMinAvgAlgorithm):
                 self.shortest_paths["u1{}".format(i)]["u4{}".format(j)] = paths["u4{}".format(j)]
                 self.shortest_path_lengths[("u1{}".format(i), "u4{}".format(j))] = lens["u4{}".format(j)]       # heapdict 是小根堆
 
-        end = time()
-        self.get_all_stp_time = end - start
-
     def assign_users(self):
-        start = time()
-        modify_stp_time = 0
-
-        source_set = set()
-        for u in range(self.env.user_num):
-            source_set.add("u1{}".format(u))
-
         service_a_finished_flag = [False for _ in range(self.env.user_num)]
         service_r_finished_flag = [False for _ in range(self.env.user_num)]
 
         assignment_times = 0
-        count_running_loop = 0
-        no_need_count = 0
         while assignment_times < self.env.user_num * 2:
-            count_running_loop += 1
             node_i, node_j, min_stp, min_len = self.get_min_stp(service_a_finished_flag, service_r_finished_flag)
-
-            self.DEBUG("[min-stp-len = {}] ({}, {}): {}".format(min_len, node_i, node_j, min_stp))
+            self.DEBUG("-----------------------------------------")
+            self.DEBUG("min-stp = {}, min-len = {}, (i, j) = ({}, {})".format(min_stp, min_len, node_i, node_j))
 
             user_i = self.env.users[int(node_i[2:])]
             user_j = self.env.users[int(node_j[2:])]
+
             need_assign_ui_a = True if user_i.service_a.node_id is None else False  # 本轮是否要决策 user_i 的服务A
-            need_assign_uj_r = True if user_j.service_r.node_id is None else False  # 本轮是否要决策 user_j 的服务R
-
-            if need_assign_ui_a is None and need_assign_uj_r is None:
-                no_need_count += 1
-
             if need_assign_ui_a:
                 target_site = self.env.sites[int(min_stp[1][2:])]
                 user_i.service_a.node_id = target_site.global_id
                 user_i.service_a.service_rate = target_site.service_rate_a
                 user_i.service_a.price = target_site.price_a
+                user_i.service_r.node_id = target_site.global_id
+                user_i.service_r.service_rate = target_site.service_rate_r
+                user_i.service_r.price = target_site.price_r
                 if self.consider_cost_tq:
                     user_i.service_a.update_num_server(self.best_x_serviceA[user_i.user_id][target_site.global_id])
+                    user_i.service_r.update_num_server(self.best_x_serviceR[user_i.user_id][target_site.global_id])
                 else:
                     user_i.service_a.queuing_delay = 0
                     user_i.service_a.num_server = 0
+                    user_i.service_r.queuing_delay = 0
+                    user_i.service_r.num_server = 0
 
                 service_a_finished_flag[user_i.user_id] = True
-                assignment_times += 1
+                service_r_finished_flag[user_i.user_id] = True
+                assignment_times += 2
                 self.DEBUG("[Assign] user {} service_a --> site {}".format(user_i.user_id, target_site.global_id))
+                self.DEBUG("[Assign] user {} service_r --> site {}".format(user_i.user_id, target_site.global_id))
 
+            need_assign_uj_r = True if user_j.service_r.node_id is None else False  # 本轮是否要决策 user_j 的服务R
             if need_assign_uj_r:
                 target_site = self.env.sites[int(min_stp[-2][2:])]
                 user_j.service_r.node_id = target_site.global_id
                 user_j.service_r.service_rate = target_site.service_rate_r
                 user_j.service_r.price = target_site.price_r
+                user_j.service_a.node_id = target_site.global_id
+                user_j.service_a.service_rate = target_site.service_rate_a
+                user_j.service_a.price = target_site.price_a
                 if self.consider_cost_tq:
                     user_j.service_r.update_num_server(self.best_x_serviceR[user_j.user_id][target_site.global_id])
+                    user_j.service_a.update_num_server(self.best_x_serviceA[user_j.user_id][target_site.global_id])
                 else:
                     user_j.service_r.queuing_delay = 0
                     user_j.service_r.num_server = 0
+                    user_j.service_a.queuing_delay = 0
+                    user_j.service_a.num_server = 0
 
+                service_a_finished_flag[user_j.user_id] = True
                 service_r_finished_flag[user_j.user_id] = True
-                assignment_times += 1
+                assignment_times += 2
+                self.DEBUG("[Assign] user {} service_a --> site {}".format(user_j.user_id, target_site.global_id))
                 self.DEBUG("[Assign] user {} service_r --> site {}".format(user_j.user_id, target_site.global_id))
 
+            # fixme
             self.shortest_paths[node_i].pop(node_j)
             self.shortest_path_lengths.__delitem__((node_i, node_j))
+            self.DEBUG("[Pop] shortest_path[{}][{}]".format(node_i, node_j))
+            self.DEBUG("[Delete] shortest_path_lengths ({}, {})".format(node_i, node_j))
 
             """ 将冲突边删除 """
             if need_assign_ui_a:
+                node_i_u4 = "u4{}".format(user_i.user_id)
+                user_i_s3_node = "s3{}".format(user_i.service_r.node_id)
                 for k in range(self.env.site_num):
                     node_name = "s2{}".format(k)
                     if node_name != min_stp[1]:
                         self.graph.remove_edge(node_i, node_name)
                         self.reversed_graph.remove_edge(node_name, node_i)
-            if need_assign_uj_r:
+                    node_name = "s3{}".format(k)
+                    if node_name != user_i_s3_node:
+                        self.graph.remove_edge(node_name, node_i_u4)
+                        self.reversed_graph.remove_edge(node_i_u4, node_name)
+
+            if need_assign_uj_r and user_i != user_j:
+                node_j_u1 = "u1{}".format(user_j.user_id)
+                user_j_s2_node = "s2{}".format(user_j.service_a.node_id)
                 for k in range(self.env.site_num):
                     node_name = "s3{}".format(k)
                     if node_name != min_stp[-2]:
                         self.graph.remove_edge(node_name, node_j)
                         self.reversed_graph.remove_edge(node_j, node_name)
+                    node_name = "s2{}".format(k)
+                    if node_name != user_j_s2_node:
+                        self.graph.remove_edge(node_j_u1, node_name)
+                        self.reversed_graph.remove_edge(node_name, node_j_u1)
 
-            """ 修改被影响的最短路径 version 2 """
-            modify_stp_start = time()
+            """ 修改被影响的最短路径 """
             if need_assign_ui_a:
+                node_i_u4 = "u4{}".format(user_i.user_id)
                 temp_stp_lengths, temp_stp_paths = nx.single_source_dijkstra(self.graph, node_i)
                 for k in range(self.env.user_num):
                     target_node = "u4{}".format(k)
-                    if target_node != node_j:
+                    if target_node != node_j and target_node != node_i_u4:
                         self.shortest_path_lengths[(node_i, target_node)] = temp_stp_lengths[target_node]
                         self.shortest_paths[node_i][target_node] = temp_stp_paths[target_node]
 
-            if need_assign_uj_r:
+                node_j_u1 = "u1{}".format(user_j.user_id)
+                temp_stp_lengths, temp_stp_paths = nx.single_source_dijkstra(self.reversed_graph, node_i_u4)
+                for k in range(self.env.user_num):
+                    target_node = "u1{}".format(k)
+                    if target_node != node_i and target_node != node_j_u1:
+                        self.shortest_path_lengths[(target_node, node_i_u4)] = temp_stp_lengths[target_node]
+                        self.shortest_paths[target_node][node_i_u4] = temp_stp_paths[target_node][::-1]
+
+            if need_assign_uj_r and user_i != user_j:
+                node_j_u1 = "u1{}".format(user_j.user_id)
                 temp_stp_lengths, temp_stp_paths = nx.single_source_dijkstra(self.reversed_graph, node_j)
                 for k in range(self.env.user_num):
                     target_node = "u1{}".format(k)
-                    if target_node != node_i:
+                    if target_node != node_i and target_node != node_j_u1:
                         self.shortest_path_lengths[(target_node, node_j)] = temp_stp_lengths[target_node]
                         self.shortest_paths[target_node][node_i] = temp_stp_paths[target_node][::-1]
 
-            modify_stp_end = time()
-            modify_stp_time += modify_stp_end - modify_stp_start
-
-        end = time()
-        self.assign_user_time = end - start
-        self.DEBUG("[assign_user] running in loop: {}".format(count_running_loop))
-        self.DEBUG("[assign_user] no_need_count: {}".format(no_need_count))
-        self.DEBUG("[assign_user] modify_stp_time: {}ms".format(modify_stp_time * 1000))
-
+                node_i_u4 = "u4{}".format(user_i.user_id)
+                temp_stp_lengths, temp_stp_paths = nx.single_source_dijkstra(self.graph, node_j_u1)
+                for k in range(self.env.user_num):
+                    target_node = "u4{}".format(k)
+                    if target_node != node_j and target_node != node_i_u4:
+                        self.shortest_path_lengths[(node_j_u1, target_node)] = temp_stp_lengths[target_node]
+                        self.shortest_paths[node_j_u1][target_node] = temp_stp_paths[target_node]
 
     def get_min_stp(self, service_a_finished_flag, service_r_finished_flag):
         user_pair, min_stp_len, target_stp = None, -1, None
@@ -326,7 +330,6 @@ class MinAvgOurs(BaseMinAvgAlgorithm):
 
         return user_pair[0], user_pair[1], target_stp, min_stp_len
 
-
     def DEBUG(self, info: str):
         if self.debug_flag:
             print(info)
@@ -335,6 +338,7 @@ if __name__ == "__main__":
     from env.environment_old import Environment
     import random
     from configuration.config import config as conf
+    from min_avg.min_avg_ours import MinAvgOurs
 
     print("==================== env  config ===============================")
     print(conf)
@@ -346,18 +350,27 @@ if __name__ == "__main__":
 
     num_user = 70
 
-    for i in range(1):
+    for i in range(10):
         print("========================= iteration {} ============================".format(i + 1))
-        # u_seed = random.randint(0, 10000000000)
-        u_seed = 3248011051
+        u_seed = random.randint(0, 10000000000)
+        # u_seed = 1980308101
         print("user_seed = {}".format(u_seed))
 
-        print("------------- shortest-path-opt ------------------------")
+        print("------------- min our centralized ------------------------")
         env = Environment(conf, env_seed)
         env.reset(num_user=num_user, user_seed=u_seed)
-        our_alg = MinAvgOurs(env, consider_cost_tq=True, stable_only=False)
-        our_alg.run()
-        our_alg.result_info()
-        print(our_alg.get_results())
+        cent_alg = MinAvgCentralized(env, consider_cost_tq=True, stable_only=False)
+        # cent_alg.debug_flag = True
+        cent_alg.run()
+        # cent_alg.result_info()
+        print(cent_alg.get_results())
 
+        print("------------- min our distribute ------------------------")
+        env = Environment(conf, env_seed)
+        env.reset(num_user=num_user, user_seed=u_seed)
+        dist_alg = MinAvgOurs(env, consider_cost_tq=True, stable_only=False)
+        # dist_alg.debug_flag = True
+        dist_alg.run()
+        # dist_alg.result_info()
+        print(dist_alg.get_results())
 
