@@ -24,11 +24,14 @@ marker_list = ['d', '^', 'X', 'o', 's', 'v', 'P',  '*','>','<','x']
 figure_size = (10, 10)
 dpi = 60
 
-algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
-algorithm_in_fig = ["Nearest", "Modify-Assignment", "Modify-Assignment-V2", "Min-Avg"]
+# algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
+# algorithm_in_fig = ["Nearest", "Modify-Assignment", "Modify-Assignment-V2", "Min-Avg"]
 
 # algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "GSP", "Ours"]
 # algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "GSP", "Min-Max"]
+
+algorithm_list = ["Ours", "Ours_centralized"]
+algorithm_in_fig = ["Min-Avg(Independent)", "Min-Avg(Centralized)"]
 
 
 # 获取一组实验的json文件的路径
@@ -242,12 +245,12 @@ def draw_figures_shared_legend(data: dict):
     plt.show()
 
 if __name__ == '__main__':
-    eta = 0
+    eta = 0.5
     if eta == 0:
         algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
         algorithm_in_fig = ["Nearest", "Modify-Assignment", "Modify-Assignment-V2", "Min-Avg"]
 
-    raw_data_path = "min_avg/11-14_eta{}_min-avg-ma-3kinds".format(eta)
+    raw_data_path = "min_avg/12-8_eta{}_min-avg-centralized".format(eta)
     res_dict = process_data(raw_data_path)
     # print(res_dict)
 
@@ -262,6 +265,6 @@ if __name__ == '__main__':
     else:
         # draw_figures_shared_legend(res_dict)
 
-        draw_avg_delay(res_dict)
-        draw_avg_cost(res_dict)
+        # draw_avg_delay(res_dict)
+        # draw_avg_cost(res_dict)
         draw_target_value(res_dict)

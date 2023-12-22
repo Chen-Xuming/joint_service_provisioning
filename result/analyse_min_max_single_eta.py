@@ -20,7 +20,7 @@ color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
 marker_list = ['d', '^', 'X', 'o', 's', 'v', 'P',  '*','>','<','x']
 
 figure_size = (10, 10)
-dpi = 100
+dpi = 60
 
 # algorithm_list = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
 # algorithm_in_fig = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
@@ -29,8 +29,11 @@ dpi = 100
 # algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "M-Greedy-V2(Tx+Tp+Tq)", "Min-Avg", "Max-First", "Ours"]
 # algorithm_in_fig = ["Nearest", "M-Greedy(Tx)", "M-Greedy(Tx+Tp)", "M-Greedy(Tx+Tp+Tq)", "Min-Avg", "Max-First", "Ours"]
 
-algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
-algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
+# algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
+# algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
+
+algorithm_list = ["Ours", "Ours_centralized"]
+algorithm_in_fig = ["Min-Max(Independent)", "Min-Max(Centralized)"]
 
 
 # 获取一组实验的json文件的路径
@@ -333,12 +336,12 @@ def draw_figures_shared_legend(data: dict):
     plt.show()
 
 if __name__ == '__main__':
-    eta = 0
+    eta = 0.5
     if eta == 0:
         algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "Ours"]
         algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
 
-    raw_data_path = "min_max/11-15_eta{}_min-max-mgreedy-3kinds".format(eta)
+    raw_data_path = "min_max/12-8_eta{}_min-max-centralized".format(eta)
     # raw_data_path = "min_max/11-24_eta{}_min-max-mgreedy-3kinds".format(eta)
     res_dict = process_data(raw_data_path)
     print(res_dict)
@@ -353,8 +356,8 @@ if __name__ == '__main__':
         draw_max_delay(res_dict)
     else:
         # draw_figures_shared_legend(res_dict)
-        draw_max_delay(res_dict)
-        draw_avg_cost(res_dict)
+        # draw_max_delay(res_dict)
+        # draw_avg_cost(res_dict)
         draw_target_value(res_dict)
 
     # res_dict = process_data_v2(raw_data_path)
