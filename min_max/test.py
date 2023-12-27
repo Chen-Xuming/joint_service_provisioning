@@ -15,7 +15,7 @@ print("env_seed: ", env_seed)
 
 num_user = 60
 
-sim_times = 10
+sim_times = 1
 for sim_id in range(sim_times):
     print("========================= iteration {} ============================".format(sim_id + 1))
     u_seed = random.randint(0, 10000000000)
@@ -49,28 +49,31 @@ for sim_id in range(sim_times):
     env.reset(num_user=num_user, user_seed=u_seed)
     m_greedy_alg = MGreedyAlgorithm(env)
     m_greedy_alg.run()
+    m_greedy_alg.result_info()
     print(m_greedy_alg.get_results())
 
-    print("------------- M-Greedy-V2(110) ------------------------")
-    env = Environment(conf, env_seed)
-    env.reset(num_user=num_user, user_seed=u_seed)
-    m_greedy_alg_v2 = MGreedyAlgorithm_V2(env, max_t_compositions=0b110)
-    m_greedy_alg_v2.run()
-    print(m_greedy_alg_v2.get_results())
+    # print("------------- M-Greedy-V2(110) ------------------------")
+    # env = Environment(conf, env_seed)
+    # env.reset(num_user=num_user, user_seed=u_seed)
+    # m_greedy_alg_v2 = MGreedyAlgorithm_V2(env, max_t_compositions=0b110)
+    # m_greedy_alg_v2.run()
+    # print(m_greedy_alg_v2.get_results())
 
     print("------------- M-Greedy-V2(111) ------------------------")
     env = Environment(conf, env_seed)
     env.reset(num_user=num_user, user_seed=u_seed)
     m_greedy_alg_v2 = MGreedyAlgorithm_V2(env, max_t_compositions=0b111)
     m_greedy_alg_v2.run()
+    m_greedy_alg_v2.result_info()
     print(m_greedy_alg_v2.get_results())
 
     print("------------- Ours ------------------------")
-    # env = Environment(conf, env_seed)
-    # env.reset(num_user=num_user, user_seed=u_seed)
-    # our_alg = MinMaxOurs_V2(env)
+    env = Environment(conf, env_seed)
+    env.reset(num_user=num_user, user_seed=u_seed)
+    our_alg = MinMaxOurs_V2(env)
     # our_alg.debug_flag = True
-    # our_alg.alpha = alpha_initial_values[conf["eta"]][num_user]
-    # our_alg.epsilon = 15
-    # our_alg.run()
-    # print(our_alg.get_results())
+    our_alg.alpha = alpha_initial_values[conf["eta"]][num_user]
+    our_alg.epsilon = 15
+    our_alg.run()
+    our_alg.result_info()
+    print(our_alg.get_results())

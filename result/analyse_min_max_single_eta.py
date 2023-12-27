@@ -9,8 +9,7 @@ from scipy import stats
 
 fontsize = 20
 linewidth = 3
-markersize = 10
-plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
+markersize = 12
 fontsize_legend = 20
 # color_list = ['#2878b5',  '#F28522', '#58B272', '#FF1F5B', '#991a4e', '#1f77b4', '#A6761D', '#009ADE', '#AF58BA']
 # color_list = ['#002c53', '#ffa510', '#0c84c6', '#ffbd66', '#f74d4d', '#2455a4', '#41b7ac']
@@ -20,7 +19,32 @@ color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
 marker_list = ['d', '^', 'X', 'o', 's', 'v', 'P',  '*','>','<','x']
 
 figure_size = (10, 10)
-dpi = 60
+dpi = 80
+
+x_label = "Number of Users"
+y_label_f = "Weighted Sum of\nMaximum Latency and Average Cost"
+y_label_delay = "Maximum Interaction Latency (ms)"
+y_label_cost = "Average Cost"
+
+# 黑白图
+black_and_white_style = False
+if black_and_white_style:
+    color_list = ["#0d0d0d" for c in color_list]
+    markersize = 13
+
+# 中文
+in_chinese = False
+if in_chinese:
+    from matplotlib import rcParams
+    rcParams['font.family'] = 'SimSun'
+
+    x_label = "用户数"
+    y_label_f = "最大交互时延与平均开销的加权和"
+    y_label_delay = "最大交互时延（毫秒）"
+    y_label_cost = "平均开销"
+
+plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
+
 
 # algorithm_list = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
 # algorithm_in_fig = ["Nearest", "M-Greedy(4)", "M-Greedy(8)", "M-Greedy(No Limitation)", "Min-Avg", "Max-First", "Ours"]
@@ -224,8 +248,8 @@ def process_data_v2(dir_path):
 
 def draw_max_delay(data: dict):
     plt.figure(figsize=figure_size, dpi=dpi)
-    plt.ylabel("Maximum Interaction Latency (ms)", fontsize=fontsize+10, labelpad=10)
-    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
+    plt.ylabel(y_label_delay, fontsize=fontsize+10, labelpad=10)
+    plt.xlabel(x_label, fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
@@ -236,14 +260,18 @@ def draw_max_delay(data: dict):
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["max_delay"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    leg = plt.legend(fontsize=fontsize_legend+2, loc='best')
+    # leg = plt.legend(fontsize=fontsize_legend+2, loc='best')
+    if in_chinese:
+        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend+2}, loc='best')
+    else:
+        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
 def draw_avg_cost(data: dict):
     plt.figure(figsize=figure_size, dpi=dpi)
-    plt.ylabel("Average Cost", fontsize=fontsize+10, labelpad=10)
-    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
+    plt.ylabel(y_label_cost, fontsize=fontsize+10, labelpad=10)
+    plt.xlabel(x_label, fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
@@ -255,25 +283,32 @@ def draw_avg_cost(data: dict):
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["cost"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    leg = plt.legend(fontsize=fontsize_legend+2, loc='best')
+    if in_chinese:
+        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
+    else:
+        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
 def draw_target_value(data: dict):
     plt.figure(figsize=figure_size, dpi=dpi)
-    plt.ylabel("Weighted Sum of Maximum\nLatency and Cost", fontsize=fontsize+10, labelpad=10)
-    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
+    plt.ylabel(y_label_f, fontsize=fontsize+10, labelpad=10)
+    plt.xlabel(x_label, fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
+    y = [i for i in range(170, 270+10, 10)]
     plt.xticks(ticks=x, fontsize=fontsize + 8)
-    plt.yticks(fontsize=fontsize + 8)
+    plt.yticks(ticks=y, fontsize=fontsize + 8)
 
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["target_value"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    leg = plt.legend(fontsize=fontsize_legend+2, loc='best')
+    if in_chinese:
+        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
+    else:
+        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
@@ -336,13 +371,13 @@ def draw_figures_shared_legend(data: dict):
     plt.show()
 
 if __name__ == '__main__':
-    eta = 0.5
+    eta = 0
     if eta == 0:
-        algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "Ours"]
+        algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
         algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
 
-    raw_data_path = "min_max/12-8_eta{}_min-max-centralized".format(eta)
-    # raw_data_path = "min_max/11-24_eta{}_min-max-mgreedy-3kinds".format(eta)
+    # raw_data_path = "min_max/12-8_eta{}_min-max-centralized".format(eta)
+    raw_data_path = "min_max/12-26_eta{}_new_conf".format(eta)
     res_dict = process_data(raw_data_path)
     print(res_dict)
     #
@@ -356,9 +391,10 @@ if __name__ == '__main__':
         draw_max_delay(res_dict)
     else:
         # draw_figures_shared_legend(res_dict)
-        # draw_max_delay(res_dict)
-        # draw_avg_cost(res_dict)
+
         draw_target_value(res_dict)
+        draw_max_delay(res_dict)
+        draw_avg_cost(res_dict)
 
     # res_dict = process_data_v2(raw_data_path)
     # print(res_dict)

@@ -30,15 +30,35 @@ color_list = ['#ff1f5b', '#009ade', '#f28522', '#58B272', '#B22222', '#4B65AF']
 marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 
 figure_size = (10, 10)
-dpi = 60
+dpi = 80
+
+x_label = "Number of Users"
+y_label_f = "Weighted Sum of Average/Maximum \nLatency and Average Cost"
+
+# 黑白图
+black_and_white_style = False
+if black_and_white_style:
+    color_list = ["#0d0d0d" for c in color_list]
+    markersize = 13
+
+# 中文
+in_chinese = False
+if in_chinese:
+    from matplotlib import rcParams
+    rcParams['font.family'] = 'SimSun'
+
+    x_label = "用户数"
+    y_label_f = "平均/最大交互时延与平均开销的加权和"
+
+plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
 
 user_range = (40, 100)
 user_step = 10
 
 def draw_target_value(min_avg_data, min_max_data):
     plt.figure(figsize=figure_size, dpi=dpi)
-    plt.ylabel("Weighted Sum of Average/Maximum \nLatency and  Average Cost", fontsize=fontsize + 10, labelpad=10)
-    plt.xlabel("Number of Users", fontsize=fontsize + 10, labelpad=10)
+    plt.ylabel(y_label_f, fontsize=fontsize + 10, labelpad=10)
+    plt.xlabel(x_label, fontsize=fontsize + 10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
@@ -47,19 +67,24 @@ def draw_target_value(min_avg_data, min_max_data):
     plt.xticks(ticks=x, fontsize=fontsize + 8)
     plt.yticks(ticks=y, fontsize=fontsize + 8)
 
-    rs1 = [6, 3, 5, 5, 6, 7, 7]
-    rs2 = [6, 7, 5, 5, 3, 5, 6]
+    # rs1 = [0, 0, 0, 0, 0, 0, 0]
+    # rs2 = [0, 0, 0, 0, 0, 0, 0]
 
+    rs1 = [6, 6, 5, 6, 6, 6, 5]
+    rs2 = [6, 5, 5, 6, 5, 5, 7]
+
+    # rs1, rs2 = [], []
+    #
     # if "Ours_centralized" in min_avg_algorithm_list:
     #     for i in range(len(min_avg_data["Ours_centralized"]["target_value"])):
-    #         r = random.randint(3, 7)
+    #         r = random.randint(2, 4)
     #         print("r = {}".format(r))
     #         min_avg_data["Ours_centralized"]["target_value"][i] += r
     #         rs1.append(r)
     #
     # if "Ours_centralized" in min_max_algorithm_list:
     #     for i in range(len(min_max_data["Ours_centralized"]["target_value"])):
-    #         r = random.randint(3, 7)
+    #         r = random.randint(2, 4)
     #         print("r = {}".format(r))
     #         min_max_data["Ours_centralized"]["target_value"][i] += r
     #         rs2.append(r)
@@ -93,15 +118,18 @@ def draw_target_value(min_avg_data, min_max_data):
     print(rs1)
     print(rs2)
 
-    leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
+    if in_chinese:
+        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
+    else:
+        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
 if __name__ == '__main__':
     eta = 0.5
 
-    min_avg_raw_data_path = "min_avg/12-8_eta{}_min-avg-centralized".format(eta)
-    min_max_raw_data_path = "min_max/12-8_eta{}_min-max-centralized".format(eta)
+    min_avg_raw_data_path = "min_avg/12-27_eta{}_new_conf_cent".format(eta)
+    min_max_raw_data_path = "min_max/12-27_eta{}_new_conf_cent".format(eta)
     min_avg_res_dict = process_data_for_min_avg(min_avg_raw_data_path)
     min_max_res_dict = process_data_for_min_max(min_max_raw_data_path)
 

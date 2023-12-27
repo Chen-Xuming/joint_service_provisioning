@@ -18,23 +18,23 @@ config = {
     # "trigger_probability": 1.0,         # 无用
     # "minmax_service_rate_A_common": (50, 80),
     # "minmax_service_rate_R_common": (40, 60),
-    # "minmax_price_A_common": (3, 6),                # (1, 2)
-    # "minmax_price_R_common": (5, 8),                # (1, 2)
+    # "minmax_price_A_common": (8, 15),                # (1, 2)
+    # "minmax_price_R_common": (12, 20),                # (1, 2)
     # "minmax_service_rate_A_edge": (30, 50),
     # "minmax_service_rate_R_edge": (20, 35),
-    # "minmax_price_A_edge": (5, 8),                  # (2, 4)
-    # "minmax_price_R_edge": (9, 14),                 # (2, 4)
+    # "minmax_price_A_edge": (12, 18),                  # (2, 4)
+    # "minmax_price_R_edge": (15, 25),                 # (2, 4)
 
     "minmax_arrival_rate": (2, 6),
-    "trigger_probability": 1.0,         # 无用
+    "trigger_probability": 1.0,  # 无用
     "minmax_service_rate_A_common": (50, 80),
     "minmax_service_rate_R_common": (40, 60),
-    "minmax_price_A_common": (8, 15),                # (1, 2)
-    "minmax_price_R_common": (12, 20),                # (1, 2)
+    "minmax_price_A_common": (13, 18),  # (1, 2)
+    "minmax_price_R_common": (16, 20),  # (1, 2)
     "minmax_service_rate_A_edge": (30, 50),
     "minmax_service_rate_R_edge": (20, 35),
-    "minmax_price_A_edge": (12, 18),                  # (2, 4)
-    "minmax_price_R_edge": (15, 25),                 # (2, 4)
+    "minmax_price_A_edge": (7, 12),  # (2, 4)
+    "minmax_price_R_edge": (10, 15),  # (2, 4)
 
     "eta": 0.5,
 }

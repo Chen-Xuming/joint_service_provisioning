@@ -11,7 +11,7 @@ from collections import OrderedDict
 
 fontsize = 20
 linewidth = 3
-markersize = 10
+markersize = 12
 plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
 fontsize_legend = 20
 # color_list = ['#2878b5',  '#F28522', '#58B272', '#FF1F5B', '#991a4e', '#1f77b4', '#A6761D', '#009ADE', '#AF58BA']
@@ -24,13 +24,38 @@ color_list = ['#ff1f5b', '#009ade', '#f28522', '#58B272', '#B22222', '#4B65AF']
 marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 
 figure_size = (10, 10)
-dpi = 100
+dpi = 80
+
+x_label = "Number of Users"
+y_label_f = "Weighted Sum of\nMaximum Latency and Average Cost"
+y_label_delay = "Maximum Interaction Latency (ms)"
+y_label_cost = "Average Cost"
+
+# 黑白图
+black_and_white_style = False
+if black_and_white_style:
+    color_list = ["#0d0d0d" for c in color_list]
+    markersize = 13
+
+# 中文
+in_chinese = False
+if in_chinese:
+    from matplotlib import rcParams
+    rcParams['font.family'] = 'SimSun'
+
+    x_label = "用户数"
+    y_label_f = "最大交互时延与平均开销的加权和"
+    y_label_delay = "最大交互时延（毫秒）"
+    y_label_cost = "平均开销"
+
+plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
 
 # algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
 algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
 algorithm_name_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
 
-etas = [0.5, 0.75, 1.0]
+# etas = [0.5, 0.75, 1.0]
+etas = [0.25, 0.5, 0.75]
 
 user_range = (40, 100)
 user_step = 10
@@ -86,7 +111,8 @@ def draw_reduction_ratio(reduction_ratios, attribute: str):
         plt.plot(x, ratios, label=r'$\eta={}$'.format(eta), color=color_list[idx], marker=marker_list[idx])
         idx += 1
 
-    leg = plt.legend(fontsize=fontsize_legend)
+    # leg = plt.legend(fontsize=fontsize_legend)
+    leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
     leg.set_draggable(state=True)
 
     plt.show()
@@ -162,13 +188,13 @@ def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="O
 
     y_label = ""
     if attribution == "target_value":
-        y_label = "Weighted Sum of Maximum\nLatency and Cost"
+        y_label = y_label_f
     elif attribution == "max_delay":
-        y_label = "Maximum Interaction Latency (ms)"
+        y_label = y_label_delay
     elif attribution == "cost":
-        y_label = "Average Cost"
+        y_label = y_label_cost
     plt.ylabel(ylabel=y_label, fontsize=fontsize+10, labelpad=10)
-    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
+    plt.xlabel(x_label, fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
@@ -176,6 +202,9 @@ def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="O
     plt.xticks(ticks=x, fontsize=fontsize + 8)
     plt.yticks(fontsize=fontsize + 8)
 
+    if attribution == "target_value":
+        y_ = [i for i in range(150, 300+25, 25)]
+        plt.yticks(y_)
     if attribution == "cost":
         y_ = [i for i in range(70, 200, 10)]
         plt.yticks(y_)
@@ -195,7 +224,11 @@ def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="O
                  marker=marker_list[idx],
                  linestyle="--")
 
-    leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
+    n_col = 1 if attribution != "max_delay" else 1
+    if in_chinese:
+        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best', ncol=n_col)
+    else:
+        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best', ncol=n_col)
     leg.set_draggable(state=True)
     plt.show()
 
@@ -315,18 +348,18 @@ def draw_histogram_with_error_bar(res_dict, attribution: str, our_algo="Ours", c
 
 
 if __name__ == '__main__':
-    file_name = "min_max/11-15_eta{}_min-max-mgreedy-3kinds"
+    file_name = "min_max/12-26_eta{}_new_conf"
     raw_result = process_data(file_name)
     print(raw_result)
 
-    # target_value_reduction_ratios = get_reduction_ratio(raw_result, "target_value")
-    # draw_reduction_ratio(target_value_reduction_ratios, "target_value")
-    #
-    # max_delay_reduction_ratios = get_reduction_ratio(raw_result, "max_delay")
-    # draw_reduction_ratio(max_delay_reduction_ratios, "max_delay")
-    #
-    # avg_cost_reduction_ratios = get_reduction_ratio(raw_result, "cost")
-    # draw_reduction_ratio(avg_cost_reduction_ratios, "avg_cost")
+    target_value_reduction_ratios = get_reduction_ratio(raw_result, "target_value")
+    draw_reduction_ratio(target_value_reduction_ratios, "target_value")
+
+    max_delay_reduction_ratios = get_reduction_ratio(raw_result, "max_delay")
+    draw_reduction_ratio(max_delay_reduction_ratios, "max_delay")
+
+    avg_cost_reduction_ratios = get_reduction_ratio(raw_result, "cost")
+    draw_reduction_ratio(avg_cost_reduction_ratios, "avg_cost")
 
     # get_and_draw_all_reduction_ratios(raw_result)
     #
@@ -338,7 +371,5 @@ if __name__ == '__main__':
     draw_merged_eta_for_some_attribution(raw_result, "max_delay")
     draw_merged_eta_for_some_attribution(raw_result, "cost")
 
-    # raw_result = process_data(file_name, True)
-    # draw_histogram_with_error_bar(raw_result, "target_value")
-    # draw_histogram_with_error_bar(raw_result, "max_delay")
-    # draw_histogram_with_error_bar(raw_result, "cost")
+    offloading_distribution = get_offloading_ratio(raw_result)
+    print(offloading_distribution)

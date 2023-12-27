@@ -8,26 +8,54 @@ import os
 
 fontsize = 20
 linewidth = 3
-markersize = 10
-plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
+markersize = 12
 fontsize_legend = 20
 # color_list = ['#2878b5',  '#F28522', '#58B272', '#FF1F5B', '#991a4e', '#1f77b4', '#A6761D', '#009ADE', '#AF58BA']
-color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
-# color_list = ['#58B272', '#009ade', '#ff1f5b']
+# color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
+color_list = ['#58B272', '#009ade', '#ff1f5b']
 
 # color_list = ['#002c53', '#9c403d', '#8983BF', '#58B272', '#f28522', '#009ade', '#ff1f5b']
+
+# color_list = ['#ff1f5b', '#009ade', '#f28522', '#58B272', '#B22222', '#4B65AF']
+
 
 # marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 marker_list = ['d', 'X', 'o', '^', 's', 'v', 'P',  '*','>','<','x']
 
 figure_size = (10, 10)
-dpi = 60
+dpi = 80
+
+x_label = "Number of Users"
+y_label_f = "Reduction Ratio of Weighted Sum of\nAverage Latency and Average Cost (%)"
+y_label_delay = "Reduction Ratio of\nAverage Interaction Latency (%)"
+y_label_cost = "Reduction Ratio of Average Cost (%)"
+
+# 黑白图
+black_and_white_style = False
+if black_and_white_style:
+    color_list = ["#0d0d0d" for c in color_list]
+    markersize = 13
+
+# 中文
+in_chinese = False
+if in_chinese:
+    from matplotlib import rcParams
+    rcParams['font.family'] = 'SimSun'
+
+    x_label = "用户数"
+    y_label_f = "平均交互时延与平均开销加权和的减小率（%）"
+    y_label_delay = "平均交互时延减小率（%）"
+    y_label_cost = "平均开销减小率（%）"
+
+plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
 
 algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
 # algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "GSP", "Ours"]
-etas = [0, 0.25, 0.5, 0.75, 1.0]    # fixme
-
+# etas = [0, 0.25, 0.5, 0.75, 1.0]    # fixme
+#
 # etas = [0.5, 0.75, 1.0]    # fixme
+etas = [0.25, 0.5, 0.75]    # fixme
+
 
 
 user_range = (40, 100)
@@ -69,14 +97,14 @@ def draw_reduction_ratio(reduction_ratios, attribute: str):
 
     y_label = ""
     if attribute == "target_value":
-        y_label = "Reduction Ratio of Weighted Sum of \nAverage Latency and Cost (%)"
+        y_label = y_label_f
     if attribute == "avg_delay":
-        y_label = "Reduction Ratio of\nAverage Interaction Latency (%)"
+        y_label = y_label_delay
     if attribute == "cost":
-        y_label = "Reduction Ratio of Average Cost (%)"
+        y_label = y_label_cost
 
     plt.ylabel(ylabel=y_label, fontsize=fontsize+10, labelpad=10)
-    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
+    plt.xlabel(x_label, fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
@@ -85,10 +113,10 @@ def draw_reduction_ratio(reduction_ratios, attribute: str):
     plt.yticks(fontsize=fontsize + 8)
 
     if attribute == "target_value":
-        y = [i for i in range(22, 44+2, 2)]
+        y = [i for i in range(6, 16+2, 2)]
         plt.yticks(y)
     if attribute == "cost":
-        y = [i for i in range(46, 57, 1)]
+        y = [i for i in range(18, 26+1, 1)]
         plt.yticks(y)
 
     idx = 0
@@ -96,7 +124,10 @@ def draw_reduction_ratio(reduction_ratios, attribute: str):
         plt.plot(x, ratios, label=r'$\eta={}$'.format(eta), color=color_list[idx], marker=marker_list[idx])
         idx += 1
 
-    leg = plt.legend(fontsize=fontsize_legend+2)
+    if in_chinese:
+        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
+    else:
+        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
     leg.set_draggable(state=True)
 
     plt.show()
@@ -168,7 +199,7 @@ def get_offloading_ratio(res_dict):
     return res
 
 if __name__ == '__main__':
-    file_name = "min_avg/11-22_eta{}_min-avg-gsp"
+    file_name = "min_avg/12-26_eta{}_new_conf"
     raw_result = process_data(file_name)
     # print(raw_result)
 
@@ -181,7 +212,7 @@ if __name__ == '__main__':
     cost_reduction_ratios = get_reduction_ratio(raw_result, "cost")
     draw_reduction_ratio(cost_reduction_ratios, "cost")
 
-    # offloading_distribution = get_offloading_ratio(raw_result)
-    # print(offloading_distribution)
+    offloading_distribution = get_offloading_ratio(raw_result)
+    print(offloading_distribution)
 
     # get_and_draw_all_reduction_ratios(raw_result)

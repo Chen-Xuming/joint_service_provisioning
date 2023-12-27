@@ -36,6 +36,7 @@ for sim_id in range(sim_times):
     # nearest_alg.run()
     # ma_alg = ModifyAssignmentAlgorithm(env)
     # ma_alg.run()
+    # ma_alg.result_info()
     # print(ma_alg.get_results())
     #
     # print("------------- Modify-Assignment(Tx+Tp+Tq) ------------------------")
@@ -46,20 +47,14 @@ for sim_id in range(sim_times):
     # ma3_alg = ModifyAssignmentAlgorithm_V2(env, t_compositions=0b111)
     # ma3_alg.debug_flag = False
     # ma3_alg.run()
+    # ma3_alg.result_info()
     # print(ma3_alg.get_results())
-
-    print("------------- GSP ------------------------")
-    env = Environment(conf, env_seed)
-    env.reset(num_user=num_user, user_seed=u_seed)
-    gsp_alg = GreedyServerProvisioningAlgorithm(env, avg_t_compositions=0b111)
-    gsp_alg.debug_flag = True
-    gsp_alg.run()
-    print(gsp_alg.get_results())
 
     print("------------- Ours ------------------------")
     env = Environment(conf, env_seed)
     env.reset(num_user=num_user, user_seed=u_seed)
     min_avg_alg = MinAvgOurs(env)
     min_avg_alg.run()
+    min_avg_alg.result_info()
     print(min_avg_alg.get_results())
 

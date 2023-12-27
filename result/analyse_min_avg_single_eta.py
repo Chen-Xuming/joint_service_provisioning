@@ -8,8 +8,7 @@ import os
 
 fontsize = 20
 linewidth = 3
-markersize = 10
-plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
+markersize = 12
 fontsize_legend = 20
 # color_list = ['#2878b5',  '#F28522', '#58B272', '#FF1F5B', '#991a4e', '#1f77b4', '#A6761D', '#009ADE', '#AF58BA']
 # color_list = ['#002c53', '#ffa510', '#0c84c6', '#ffbd66', '#f74d4d', '#2455a4', '#41b7ac']
@@ -22,13 +21,34 @@ color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
 marker_list = ['d', '^', 'X', 'o', 's', 'v', 'P',  '*','>','<','x']
 
 figure_size = (10, 10)
-dpi = 60
+dpi = 80
+
+x_label = "Number of Users"
+y_label_f = "Weighted Sum of\nAverage Latency and Average Cost"
+y_label_delay = "Average Interaction Latency (ms)"
+y_label_cost = "Average Cost"
+
+# 黑白图
+black_and_white_style = False
+if black_and_white_style:
+    color_list = ["#0d0d0d" for c in color_list]
+    markersize = 13
+
+# 中文
+in_chinese = False
+if in_chinese:
+    from matplotlib import rcParams
+    rcParams['font.family'] = 'SimSun'
+
+    x_label = "用户数"
+    y_label_f = "平均交互时延与平均开销的加权和"
+    y_label_delay = "平均交互时延（毫秒）"
+    y_label_cost = "平均开销"
+
+plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
 
 # algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
 # algorithm_in_fig = ["Nearest", "Modify-Assignment", "Modify-Assignment-V2", "Min-Avg"]
-
-# algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "GSP", "Ours"]
-# algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "GSP", "Min-Max"]
 
 algorithm_list = ["Ours", "Ours_centralized"]
 algorithm_in_fig = ["Min-Avg(Independent)", "Min-Avg(Centralized)"]
@@ -132,8 +152,8 @@ def process_data(dir_path):
 
 def draw_avg_delay(data: dict):
     plt.figure(figsize=figure_size, dpi=dpi)
-    plt.ylabel("Average Interaction Latency (ms)", fontsize=fontsize+10, labelpad=10)
-    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
+    plt.ylabel(y_label_delay, fontsize=fontsize+10, labelpad=10)
+    plt.xlabel(x_label, fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
@@ -144,14 +164,17 @@ def draw_avg_delay(data: dict):
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["avg_delay"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    leg = plt.legend(fontsize=fontsize_legend+2, loc='best')
+    if in_chinese:
+        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
+    else:
+        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
 def draw_avg_cost(data: dict):
     plt.figure(figsize=figure_size, dpi=dpi)
-    plt.ylabel("Average Cost", fontsize=fontsize+10, labelpad=10)
-    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
+    plt.ylabel(y_label_cost, fontsize=fontsize+10, labelpad=10)
+    plt.xlabel(x_label, fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
@@ -165,14 +188,17 @@ def draw_avg_cost(data: dict):
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["cost"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    leg = plt.legend(fontsize=fontsize_legend+2, loc='best')
+    if in_chinese:
+        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
+    else:
+        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
 def draw_target_value(data: dict):
     plt.figure(figsize=figure_size, dpi=dpi)
-    plt.ylabel("Weighted Sum of Average\nLatency and Cost", fontsize=fontsize+10, labelpad=10)
-    plt.xlabel("Number of Users", fontsize=fontsize+10, labelpad=10)
+    plt.ylabel(y_label_f, fontsize=fontsize+10, labelpad=10)
+    plt.xlabel(x_label, fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
 
@@ -183,7 +209,10 @@ def draw_target_value(data: dict):
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["target_value"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    leg = plt.legend(fontsize=fontsize_legend+2, loc='best')
+    if in_chinese:
+        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
+    else:
+        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
@@ -200,7 +229,10 @@ def draw_running_time(data: dict):
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["running_time"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    leg = plt.legend(fontsize=fontsize_legend, loc='best')
+    if in_chinese:
+        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
+    else:
+        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
@@ -245,12 +277,12 @@ def draw_figures_shared_legend(data: dict):
     plt.show()
 
 if __name__ == '__main__':
-    eta = 0.5
+    eta = 0
     if eta == 0:
         algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
         algorithm_in_fig = ["Nearest", "Modify-Assignment", "Modify-Assignment-V2", "Min-Avg"]
 
-    raw_data_path = "min_avg/12-8_eta{}_min-avg-centralized".format(eta)
+    raw_data_path = "min_avg/12-26_eta{}_new_conf".format(eta)
     res_dict = process_data(raw_data_path)
     # print(res_dict)
 
@@ -265,6 +297,6 @@ if __name__ == '__main__':
     else:
         # draw_figures_shared_legend(res_dict)
 
-        # draw_avg_delay(res_dict)
-        # draw_avg_cost(res_dict)
         draw_target_value(res_dict)
+        draw_avg_delay(res_dict)
+        draw_avg_cost(res_dict)
