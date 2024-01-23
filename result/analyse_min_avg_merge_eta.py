@@ -1,6 +1,7 @@
 from analyse_min_avg_single_eta import process_data as process_data_for_single_data
 
 import simplejson as json
+import matplotlib
 from matplotlib import pyplot as plt
 import math
 import numpy as np
@@ -22,12 +23,12 @@ color_list = ['#58B272', '#009ade', '#ff1f5b']
 # marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 marker_list = ['d', 'X', 'o', '^', 's', 'v', 'P',  '*','>','<','x']
 
-figure_size = (10, 10)
+figure_size = (12, 9)
 dpi = 80
 
 x_label = "Number of Users"
-y_label_f = "Reduction Ratio of Weighted Sum of\nAverage Latency and Average Cost (%)"
-y_label_delay = "Reduction Ratio of\nAverage Interaction Latency (%)"
+y_label_f = "Reduction Ratio of " + r"$T_{avg}+\eta H$" + " (%)"
+y_label_delay = "Reduction Ratio of\nAverage Interaction Delay (%)"
 y_label_cost = "Reduction Ratio of Average Cost (%)"
 
 # 黑白图
@@ -47,24 +48,32 @@ if in_chinese:
     y_label_delay = "平均交互时延减小率（%）"
     y_label_cost = "平均开销减小率（%）"
 
-plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
+# ['dejavusans', 'dejavuserif', 'cm', 'stix', 'stixsans', 'custom']
+plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42,
+                     "mathtext.fontset" : "cm"})
 
 algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
 # algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "GSP", "Ours"]
 # etas = [0, 0.25, 0.5, 0.75, 1.0]    # fixme
 #
 # etas = [0.5, 0.75, 1.0]    # fixme
-etas = [0.25, 0.5, 0.75]    # fixme
+# etas = [0.25, 0.5, 0.75]
 
-
+etas = [0, 0.25, 0.5, 0.75]
 
 user_range = (40, 100)
 user_step = 10
 
-def process_data(file_base_name):
+# def process_data(file_base_name):
+#     res = {}
+#     for eta_ in etas:
+#         file = file_base_name.format(eta_)
+#         res[eta_] = process_data_for_single_data(file)
+#     return res
+
+def process_data(files):
     res = {}
-    for eta_ in etas:
-        file = file_base_name.format(eta_)
+    for eta_, file in files.items():
         res[eta_] = process_data_for_single_data(file)
     return res
 
@@ -103,7 +112,19 @@ def draw_reduction_ratio(reduction_ratios, attribute: str):
     if attribute == "cost":
         y_label = y_label_cost
 
-    plt.ylabel(ylabel=y_label, fontsize=fontsize+10, labelpad=10)
+    ylabel_font = {
+        'usetex': False,
+        'size': fontsize + 10
+    }
+
+    # if attribute == "target_value":
+    #     ylabel_font = {
+    #         'usetex': False,
+    #         'size': fontsize + 12,
+    #
+    #     }
+
+    plt.ylabel(y_label, ylabel_font, labelpad=10)
     plt.xlabel(x_label, fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
     plt.tight_layout()
@@ -113,10 +134,10 @@ def draw_reduction_ratio(reduction_ratios, attribute: str):
     plt.yticks(fontsize=fontsize + 8)
 
     if attribute == "target_value":
-        y = [i for i in range(6, 16+2, 2)]
+        y = [i for i in range(4, 16+2, 2)]
         plt.yticks(y)
     if attribute == "cost":
-        y = [i for i in range(18, 26+1, 1)]
+        y = [i for i in range(12, 26+1, 1)]
         plt.yticks(y)
 
     idx = 0
@@ -127,7 +148,7 @@ def draw_reduction_ratio(reduction_ratios, attribute: str):
     if in_chinese:
         leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
     else:
-        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
+        leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
     leg.set_draggable(state=True)
 
     plt.show()
@@ -198,9 +219,24 @@ def get_offloading_ratio(res_dict):
             res[eta][alg] = [local_count, common_count, total, round(local_count/total*100, 1), round(common_count/total*100, 1)]
     return res
 
+# # 检查Nearest算法和Ma算法是否将服务全部都放置在Tier-1节点
+# def check_nearest_and_Ma(res_dict):
+#     pass
+
 if __name__ == '__main__':
-    file_name = "min_avg/12-26_eta{}_new_conf"
-    raw_result = process_data(file_name)
+    file_list = dict()
+    for e_ in etas:
+        file_list[e_] = "min_avg/12-26_eta{}_new_conf".format(e_)
+
+    # for e_ in [0.05, 0.10, 0.15]:
+    #     file_list[e_] = "min_avg/1-19_eta{}_small_eta".format(e_)
+    # for e_ in [0, 0.25, 0.5, 0.75]:
+    #     file_list[e_] = "min_avg/12-26_eta{}_new_conf".format(e_)
+
+    raw_result = process_data(file_list)
+
+    # file_name = "min_avg/12-26_eta{}_new_conf"
+    # raw_result = process_data(file_name)
     # print(raw_result)
 
     target_value_reduction_ratios = get_reduction_ratio(raw_result, "target_value")

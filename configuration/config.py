@@ -36,7 +36,7 @@ config = {
     "minmax_price_A_edge": (7, 12),  # (2, 4)
     "minmax_price_R_edge": (10, 15),  # (2, 4)
 
-    "eta": 0.5,
+    "eta": 0.15,
 }
 
 """ alpha 初始参考值 """

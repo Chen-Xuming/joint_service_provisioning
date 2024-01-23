@@ -23,12 +23,12 @@ color_list = ['#ff1f5b', '#009ade', '#f28522', '#58B272', '#B22222', '#4B65AF']
 
 marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 
-figure_size = (10, 10)
+figure_size = (12, 9)
 dpi = 80
 
 x_label = "Number of Users"
-y_label_f = "Weighted Sum of\nMaximum Latency and Average Cost"
-y_label_delay = "Maximum Interaction Latency (ms)"
+y_label_f = r'$T_{max}+\eta H$'
+y_label_delay = "Maximum Interaction Delay (ms)"
 y_label_cost = "Average Cost"
 
 # 黑白图
@@ -48,11 +48,12 @@ if in_chinese:
     y_label_delay = "最大交互时延（毫秒）"
     y_label_cost = "平均开销"
 
-plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
+plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42,
+                     "mathtext.fontset" : "cm"})
 
 # algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
 algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
-algorithm_name_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
+algorithm_name_in_fig = ["Nearest-RA", "M-Greedy-RA", "M-Greedy-V2-RA", "Min-Max-SP"]
 
 # etas = [0.5, 0.75, 1.0]
 etas = [0.25, 0.5, 0.75]
@@ -203,10 +204,10 @@ def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="O
     plt.yticks(fontsize=fontsize + 8)
 
     if attribution == "target_value":
-        y_ = [i for i in range(150, 300+25, 25)]
+        y_ = [i for i in range(150, 325+25, 25)]
         plt.yticks(y_)
     if attribution == "cost":
-        y_ = [i for i in range(70, 200, 10)]
+        y_ = [i for i in range(70, 230, 10)]
         plt.yticks(y_)
 
     for idx, eta_ in enumerate(etas):
@@ -214,12 +215,12 @@ def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="O
 
         plt.plot(x,
                  eta_data[our_algo][attribution],
-                 label=algorithm_name_in_fig[algorithm_list.index(our_algo)] + r'($\eta={}$)'.format(eta_),
+                 label=algorithm_name_in_fig[algorithm_list.index(our_algo)] + " " + r'($\eta={}$)'.format(eta_),
                  color=color_list[idx],
                  marker=marker_list[idx])
         plt.plot(x,
                  eta_data[compared_algo][attribution],
-                 label=algorithm_name_in_fig[algorithm_list.index(compared_algo)] + r'($\eta={}$)'.format(eta_),
+                 label=algorithm_name_in_fig[algorithm_list.index(compared_algo)] + " " + r'($\eta={}$)'.format(eta_),
                  color=color_list[idx],
                  marker=marker_list[idx],
                  linestyle="--")
@@ -228,7 +229,7 @@ def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="O
     if in_chinese:
         leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best', ncol=n_col)
     else:
-        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best', ncol=n_col)
+        leg = plt.legend(fontsize=fontsize_legend + 4, loc='best', ncol=n_col)
     leg.set_draggable(state=True)
     plt.show()
 

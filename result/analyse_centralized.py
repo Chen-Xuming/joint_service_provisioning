@@ -29,11 +29,11 @@ fontsize_legend = 20
 color_list = ['#ff1f5b', '#009ade', '#f28522', '#58B272', '#B22222', '#4B65AF']
 marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 
-figure_size = (10, 10)
+figure_size = (12, 9)
 dpi = 80
 
 x_label = "Number of Users"
-y_label_f = "Weighted Sum of Average/Maximum \nLatency and Average Cost"
+y_label_f = "Objective Value"
 
 # 黑白图
 black_and_white_style = False
@@ -50,7 +50,8 @@ if in_chinese:
     x_label = "用户数"
     y_label_f = "平均/最大交互时延与平均开销的加权和"
 
-plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42})
+plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42,
+                     "mathtext.fontset" : "cm"})
 
 user_range = (40, 100)
 user_step = 10
@@ -121,7 +122,7 @@ def draw_target_value(min_avg_data, min_max_data):
     if in_chinese:
         leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
     else:
-        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
+        leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 

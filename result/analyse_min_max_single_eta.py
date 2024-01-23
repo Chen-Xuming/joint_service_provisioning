@@ -18,12 +18,12 @@ color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
 
 marker_list = ['d', '^', 'X', 'o', 's', 'v', 'P',  '*','>','<','x']
 
-figure_size = (10, 10)
+figure_size = (12, 9)
 dpi = 80
 
 x_label = "Number of Users"
-y_label_f = "Weighted Sum of\nMaximum Latency and Average Cost"
-y_label_delay = "Maximum Interaction Latency (ms)"
+y_label_f = r'$T_{max}+\eta H$'
+y_label_delay = "Maximum Interaction Delay (ms)"
 y_label_cost = "Average Cost"
 
 # 黑白图
@@ -53,11 +53,11 @@ plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.m
 # algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "M-Greedy-V2(Tx+Tp+Tq)", "Min-Avg", "Max-First", "Ours"]
 # algorithm_in_fig = ["Nearest", "M-Greedy(Tx)", "M-Greedy(Tx+Tp)", "M-Greedy(Tx+Tp+Tq)", "Min-Avg", "Max-First", "Ours"]
 
-# algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
-# algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
-
-algorithm_list = ["Ours", "Ours_centralized"]
-algorithm_in_fig = ["Min-Max(Independent)", "Min-Max(Centralized)"]
+algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
+algorithm_in_fig = ["Nearest-RA", "M-Greedy-RA", "M-Greedy-V2-RA", "Min-Max-SP"]
+#
+# algorithm_list = ["Ours", "Ours_centralized"]
+# algorithm_in_fig = ["Min-Max-SP", "Min-Max-SP-Collocating"]
 
 
 # 获取一组实验的json文件的路径
@@ -264,7 +264,7 @@ def draw_max_delay(data: dict):
     if in_chinese:
         leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend+2}, loc='best')
     else:
-        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
+        leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
@@ -286,7 +286,7 @@ def draw_avg_cost(data: dict):
     if in_chinese:
         leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
     else:
-        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
+        leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
@@ -308,7 +308,7 @@ def draw_target_value(data: dict):
     if in_chinese:
         leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
     else:
-        leg = plt.legend(fontsize=fontsize_legend + 2, loc='best')
+        leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
     leg.set_draggable(state=True)
     plt.show()
 
@@ -374,7 +374,7 @@ if __name__ == '__main__':
     eta = 0
     if eta == 0:
         algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
-        algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max"]
+        algorithm_in_fig = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Max-SP"]
 
     # raw_data_path = "min_max/12-8_eta{}_min-max-centralized".format(eta)
     raw_data_path = "min_max/12-26_eta{}_new_conf".format(eta)

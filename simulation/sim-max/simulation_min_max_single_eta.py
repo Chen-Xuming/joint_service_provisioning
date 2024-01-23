@@ -26,8 +26,8 @@ from configuration.config import alpha_initial_values as alpha_list
 print("Script started at {}.".format(datetime.now()))
 
 """ 创建文件夹 """
-description = "new_conf_cent"        # fixme
-res_dir = "../../result/min_max/12-27_eta{}_{}".format(conf["eta"], description)
+description = "small_eta"        # fixme
+res_dir = "../../result/min_max/1-19_eta{}_{}".format(conf["eta"], description)
 if not os.path.exists(res_dir):
     os.makedirs(res_dir)
 
@@ -35,13 +35,13 @@ print("res_dir = {}".format(res_dir))
 
 env_seed = 99497
 
-simulation_no = 19  # 文件号
+simulation_no = 9  # 文件号
 print("simulation_no = {}".format(simulation_no))
 
 # 用户数及测试次数
 user_range = (40, 100)
 user_range_step = 10
-simulation_times_each_num_user = 10
+simulation_times_each_num_user = 20
 
 # algorithms = ["Nearest", "Modify-Assignment", "M-Greedy", "Shortest-Path", "Shortest-Path-V2"]
 
@@ -49,9 +49,9 @@ simulation_times_each_num_user = 10
 # algorithms = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
 # algorithms = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp)", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
 
-# algorithms = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
+algorithms = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
 
-algorithms = ["Ours", "Ours_centralized"]
+# algorithms = ["Ours", "Ours_centralized"]
 
 do_RA = True
 stable_only = False
@@ -148,7 +148,10 @@ for num_user in range(user_range[0], user_range[1] + user_range_step, user_range
                 env.reset(num_user=num_user, user_seed=user_seed)
                 our_alg = MinMaxOurs_V3(env)
                 our_alg.debug_flag = False
-                our_alg.alpha = alpha_list[conf["eta"]][num_user]
+                if conf["eta"] in alpha_list.keys():
+                    our_alg.alpha = alpha_list[conf["eta"]][num_user]
+                else:
+                    our_alg.alpha = 1e-5
                 our_alg.epsilon = 15
                 our_alg.run()
                 save_result_to_dict(num_user, sim_id_str, alg_name, our_alg)

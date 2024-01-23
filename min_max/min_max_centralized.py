@@ -78,7 +78,7 @@ class MinMaxOursCentralized(BaseMinMaxAlgorithm):
         self.total_iterations = 0
         self.best_iteration = 0
 
-        self.max_iteration = 50     # fixme: fixme: adjust this value
+        self.max_iteration = 50     # fixme: adjust this value
 
         # 记录 f 和 g 值的变化
         self.f_values = []
