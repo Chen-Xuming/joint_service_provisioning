@@ -1,7 +1,3 @@
-"""
-    对于每个用户数，不同eta使用同一种用户
-"""
-
 from env.environment2 import Environment
 from numpy.random import default_rng
 import random
@@ -9,18 +5,18 @@ import os
 import json
 from datetime import datetime
 
-from min_avg.nearest import NearestAlgorithm
-from min_avg.modify_assignment import ModifyAssignmentAlgorithm
-from min_avg.modify_assignment_v2 import ModifyAssignmentAlgorithm as ModifyAssignmentAlgorithm_V2
-from min_avg.min_avg_ours import MinAvgOurs
-
+from min_max.nearest import NearestAlgorithm
+from min_max.min_max_ours_v3 import MinMaxOurs_V3
+from min_max.mgreedy import MGreedyAlgorithm
+from min_max.mgreedy_v2 import MGreedyAlgorithm_V2
 from configuration.config import config as conf
+from configuration.config import alpha_initial_values as alpha_list
 
 print("Script started at {}.".format(datetime.now()))
 
 """ 创建文件夹 """
 description = "multi_eta"        # fixme
-res_dir = "../../result/min_avg/1-24_{}".format(description)
+res_dir = "../../result/min_max/1-24_{}".format(description)
 if not os.path.exists(res_dir):
     os.makedirs(res_dir)
 
@@ -32,14 +28,15 @@ simulation_no = 0  # 文件号
 print("simulation_no = {}".format(simulation_no))
 
 # 用户数及测试次数
-user_range = (40, 70)
+user_range = (40, 100)
 user_range_step = 30
 simulation_times_each_num_user = 4
 
 # etas = [0, 0.1]
 etas = [0, 0.1, 0.25, 0.5, 0.75]
 
-algorithms = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
+algorithms = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
+
 
 """ 保存实验配置 """
 if not os.path.exists(res_dir + "/config.txt"):
@@ -60,28 +57,6 @@ file = "{}/user{}-{}_{}.json".format(res_dir, user_range[0], user_range[1], simu
 if os.path.exists(file):
     raise Exception("File {} is already existed!".format(file))
 
-"""
-    format:
-    {
-        user_num_1: {
-            sim_id_1: {
-                "simulation_id": xxx,
-                ""user_seed": xxx,
-                eta_1: {
-                    algo_1: {
-                        result values
-                    },
-                    algo_2: {
-                        ...
-                    },...
-                },...
-            }
-        },
-        user_num_2: {
-            ...
-        }, ...
-    }
-"""
 result = {}
 
 def save_result_to_dict(num_u, sim_id, eta, algo_name, algo):
@@ -113,37 +88,37 @@ for num_user in range(user_range[0], user_range[1] + user_range_step, user_range
                     nearest_alg.run()
                     save_result_to_dict(num_user, sim_id_str, eta_, alg_name, nearest_alg)
 
-                if alg_name == "Modify-Assignment(Tx)":
+                elif alg_name == "M-Greedy(No Limitation)" or alg_name == "M-Greedy":
                     env = Environment(conf, env_seed)
                     env.reset(num_user=num_user, user_seed=user_seed)
-                    nearest_alg = NearestAlgorithm(env)
-                    nearest_alg.run()
-                    ma1_alg = ModifyAssignmentAlgorithm(env)
-                    ma1_alg.run()
-                    save_result_to_dict(num_user, sim_id_str, eta_, alg_name, ma1_alg)
+                    mg_alg = MGreedyAlgorithm(env)
+                    mg_alg.run()
+                    save_result_to_dict(num_user, sim_id_str, eta_, alg_name, mg_alg)
 
-                if alg_name == "Modify-Assignment(Tx+Tp)":
+                elif alg_name == "M-Greedy-V2(Tx+Tp)":
                     env = Environment(conf, env_seed)
                     env.reset(num_user=num_user, user_seed=user_seed)
-                    nearest_alg = NearestAlgorithm(env)
-                    nearest_alg.run()
-                    ma2_alg = ModifyAssignmentAlgorithm_V2(env, t_compositions=0b110)
-                    ma2_alg.run()
-                    save_result_to_dict(num_user, sim_id_str, eta_, alg_name, ma2_alg)
+                    mgv2_110_alg = MGreedyAlgorithm_V2(env, max_t_compositions=0b110)
+                    mgv2_110_alg.run()
+                    save_result_to_dict(num_user, sim_id_str, eta_, alg_name, mgv2_110_alg)
 
-                if alg_name == "Modify-Assignment(Tx+Tp+Tq)":
+                elif alg_name == "M-Greedy-V2(Tx+Tp+Tq)":
                     env = Environment(conf, env_seed)
                     env.reset(num_user=num_user, user_seed=user_seed)
-                    nearest_alg = NearestAlgorithm(env)
-                    nearest_alg.run()
-                    ma3_alg = ModifyAssignmentAlgorithm_V2(env, t_compositions=0b111)
-                    ma3_alg.run()
-                    save_result_to_dict(num_user, sim_id_str, eta_, alg_name, ma3_alg)
+                    mgv2_111_alg = MGreedyAlgorithm_V2(env, max_t_compositions=0b111)
+                    mgv2_111_alg.run()
+                    save_result_to_dict(num_user, sim_id_str, eta_, alg_name, mgv2_111_alg)
 
-                if alg_name == "Ours":
+                elif alg_name == "Ours":
                     env = Environment(conf, env_seed)
                     env.reset(num_user=num_user, user_seed=user_seed)
-                    our_alg = MinAvgOurs(env)
+                    our_alg = MinMaxOurs_V3(env)
+                    our_alg.debug_flag = False
+                    if conf["eta"] in alpha_list.keys():
+                        our_alg.alpha = alpha_list[conf["eta"]][num_user]
+                    else:
+                        our_alg.alpha = 1e-5
+                    our_alg.epsilon = 15
                     our_alg.run()
                     save_result_to_dict(num_user, sim_id_str, eta_, alg_name, our_alg)
 
