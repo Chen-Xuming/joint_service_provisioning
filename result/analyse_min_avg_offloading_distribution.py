@@ -57,24 +57,29 @@ def process_data(dir_path):
         print("processing file: {}".format(file))
         raw_data = json.load(open(file))
 
+        print(raw_data)
+
         for u_str, u_data in raw_data.items():
             user_num = int(u_str)
             for sim_id_str, sim_data in u_data.items():
                 for eta_ in etas:
                     for algo in algorithm_list:
-                        target[user_num][eta_][algo]["local_count"].append(sim_data[eta_][algo]["local_count"])
-                        target[user_num][eta_][algo]["common_count"].append(sim_data[eta_][algo]["local_count"])
+                        target[user_num][eta_][algo]["local_count"].append(sim_data[str(eta_)][algo]["local_count"])
+                        target[user_num][eta_][algo]["common_count"].append(sim_data[str(eta_)][algo]["common_count"])
+
+                        if algo in ["Nearest", "Modify-Assignment(Tx)"]:
+                            assert sim_data[str(eta_)][algo]["common_count"] == 0, "Algorithm {} offloads services to tier-2 nodes.".format(algo)
 
     for u, u_data in target.items():
         for e, e_data in u_data.items():
             for algo, algo_data in e_data.items():
                 total_count = np.sum(target[u][e][algo]["local_count"]) + np.sum(target[u][e][algo]["common_count"])
-                target[u][e][algo]["local_ratio"] = np.sum(target[u][e][algo]["local_count"]) / total_count
-                target[u][e][algo]["common_ratio"] = np.sum(target[u][e][algo]["common_ratio"]) / total_count
+                target[u][e][algo]["local_count"] = np.round(np.sum(target[u][e][algo]["local_count"]) / total_count * 100, decimals=1)    # 转化为百分比
+                target[u][e][algo]["common_count"] = np.round(np.sum(target[u][e][algo]["common_count"]) / total_count * 100, decimals=1)
 
-                if algo in ["Nearest", "Modify-Assignment(Tx)"]:
-                    for element in target[u][e][algo]["common_count"]:
-                        assert element == 0, "Algorithm {} offloads services to tier-2 nodes.".format(algo)
+                # if algo in ["Nearest", "Modify-Assignment(Tx)"]:
+                #     for element in target[u][e][algo]["common_count"]:
+                #         assert element == 0, "Algorithm {} offloads services to tier-2 nodes.".format(algo)
 
     return target
 
@@ -82,3 +87,14 @@ if __name__ == "__main__":
     directory = "min_avg/1-24_multi_eta"
     res = process_data(directory)
     print(res)
+
+"""  ------------- Results -----------------------
+
+user_num = 40
+                0       0.1      0.25       0.5     0.75       
+Min-Avg-SP      24.2    27.1     32.7       33.4    31.8    
+MA-V2-RA        31.4    28.1     32.8       37.8    38.1
+
+
+
+"""

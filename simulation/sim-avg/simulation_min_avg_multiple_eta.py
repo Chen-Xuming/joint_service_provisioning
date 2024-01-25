@@ -28,11 +28,11 @@ print("res_dir = {}".format(res_dir))
 
 env_seed = 99497
 
-simulation_no = 0  # 文件号
+simulation_no = 39  # 文件号
 print("simulation_no = {}".format(simulation_no))
 
 # 用户数及测试次数
-user_range = (40, 70)
+user_range = (40, 100)
 user_range_step = 30
 simulation_times_each_num_user = 4
 
