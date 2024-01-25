@@ -12,7 +12,7 @@ import random
 env_seed = 99497
 print("env_seed: ", env_seed)
 
-num_user = 60
+num_user = 70
 
 sim_times = 1
 for sim_id in range(sim_times):

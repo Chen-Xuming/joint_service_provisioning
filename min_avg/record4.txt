@@ -1,0 +1,144 @@
+------------- Ours (eta = 0.75) ------------------------
+[user0 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.0007215007215007214
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user1 - area8] serv_A --> site #0(area 0), num_server = 1.0, Tq = 0.0010404022888850356
+                 serv_R --> site #34(area 8), num_server = 11.0, Tq = 0.011724442723560043
+[user2 - area5] serv_A --> site #29(area 5), num_server = 1.0, Tq = 0.0037712130735386546
+                 serv_R --> site #29(area 5), num_server = 9.0, Tq = 0.012613609756159078
+[user3 - area2] serv_A --> site #22(area 2), num_server = 1.0, Tq = 0.0017391304347826088
+                 serv_R --> site #22(area 2), num_server = 10.0, Tq = 0.007826675169362352
+[user4 - area8] serv_A --> site #34(area 8), num_server = 1.0, Tq = 0.0011344299489506522
+                 serv_R --> site #34(area 8), num_server = 11.0, Tq = 0.011724442723560043
+[user5 - area9] serv_A --> site #36(area 9), num_server = 1.0, Tq = 0.000945626477541371
+                 serv_R --> site #36(area 9), num_server = 10.0, Tq = 0.007826675169362352
+[user6 - area2] serv_A --> site #22(area 2), num_server = 1.0, Tq = 0.0017391304347826088
+                 serv_R --> site #22(area 2), num_server = 10.0, Tq = 0.007826675169362352
+[user7 - area2] serv_A --> site #22(area 2), num_server = 1.0, Tq = 0.001276595744680851
+                 serv_R --> site #22(area 2), num_server = 10.0, Tq = 0.007826675169362352
+[user8 - area2] serv_A --> site #22(area 2), num_server = 1.0, Tq = 0.0017391304347826088
+                 serv_R --> site #22(area 2), num_server = 10.0, Tq = 0.007826675169362352
+[user9 - area8] serv_A --> site #0(area 0), num_server = 1.0, Tq = 0.0006751054852320675
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user10 - area3] serv_A --> site #25(area 3), num_server = 1.0, Tq = 0.002168021680216802
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user11 - area3] serv_A --> site #25(area 3), num_server = 1.0, Tq = 0.0027777777777777775
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user12 - area4] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.0009775171065493646
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user13 - area7] serv_A --> site #33(area 7), num_server = 1.0, Tq = 0.0028476506881822496
+                 serv_R --> site #33(area 7), num_server = 10.0, Tq = 0.004400087116442253
+[user14 - area9] serv_A --> site #36(area 9), num_server = 1.0, Tq = 0.003113648157758173
+                 serv_R --> site #36(area 9), num_server = 10.0, Tq = 0.007826675169362352
+[user15 - area3] serv_A --> site #25(area 3), num_server = 1.0, Tq = 0.00103359173126615
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user16 - area5] serv_A --> site #29(area 5), num_server = 1.0, Tq = 0.0037712130735386546
+                 serv_R --> site #29(area 5), num_server = 9.0, Tq = 0.012613609756159078
+[user17 - area3] serv_A --> site #25(area 3), num_server = 1.0, Tq = 0.0027777777777777775
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user18 - area5] serv_A --> site #29(area 5), num_server = 1.0, Tq = 0.003059975520195838
+                 serv_R --> site #29(area 5), num_server = 9.0, Tq = 0.012613609756159078
+[user19 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.00047348484848484844
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user20 - area8] serv_A --> site #0(area 0), num_server = 1.0, Tq = 0.0008552856654122479
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user21 - area4] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.00047348484848484844
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user22 - area5] serv_A --> site #29(area 5), num_server = 1.0, Tq = 0.0011344299489506522
+                 serv_R --> site #29(area 5), num_server = 9.0, Tq = 0.012613609756159078
+[user23 - area9] serv_A --> site #36(area 9), num_server = 1.0, Tq = 0.000945626477541371
+                 serv_R --> site #36(area 9), num_server = 10.0, Tq = 0.007826675169362352
+[user24 - area4] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.0009775171065493646
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user25 - area4] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.0009775171065493646
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user26 - area2] serv_A --> site #22(area 2), num_server = 1.0, Tq = 0.001276595744680851
+                 serv_R --> site #22(area 2), num_server = 10.0, Tq = 0.007826675169362352
+[user27 - area2] serv_A --> site #22(area 2), num_server = 1.0, Tq = 0.0022222222222222222
+                 serv_R --> site #22(area 2), num_server = 10.0, Tq = 0.007826675169362352
+[user28 - area8] serv_A --> site #34(area 8), num_server = 1.0, Tq = 0.0011344299489506522
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user29 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.00047348484848484844
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user30 - area8] serv_A --> site #0(area 0), num_server = 1.0, Tq = 0.0004996668887408394
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user31 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.0007215007215007214
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user32 - area5] serv_A --> site #29(area 5), num_server = 1.0, Tq = 0.001744186046511628
+                 serv_R --> site #29(area 5), num_server = 9.0, Tq = 0.012613609756159078
+[user33 - area8] serv_A --> site #0(area 0), num_server = 1.0, Tq = 0.0010404022888850356
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user34 - area9] serv_A --> site #36(area 9), num_server = 1.0, Tq = 0.0014506769825918758
+                 serv_R --> site #36(area 9), num_server = 10.0, Tq = 0.007826675169362352
+[user35 - area2] serv_A --> site #22(area 2), num_server = 1.0, Tq = 0.0017391304347826088
+                 serv_R --> site #22(area 2), num_server = 10.0, Tq = 0.007826675169362352
+[user36 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.0012419274714356684
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user37 - area7] serv_A --> site #33(area 7), num_server = 1.0, Tq = 0.0008684324793747286
+                 serv_R --> site #33(area 7), num_server = 10.0, Tq = 0.004400087116442253
+[user38 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.0009775171065493646
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user39 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.00047348484848484844
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user40 - area10] serv_A --> site #38(area 10), num_server = 1.0, Tq = 0.002651113467656416
+                 serv_R --> site #39(area 10), num_server = 9.0, Tq = 0.012613609756159078
+[user41 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.00047348484848484844
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user42 - area10] serv_A --> site #38(area 10), num_server = 1.0, Tq = 0.0015166835187057632
+                 serv_R --> site #38(area 10), num_server = 10.0, Tq = 0.010908895321943722
+[user43 - area5] serv_A --> site #29(area 5), num_server = 1.0, Tq = 0.001744186046511628
+                 serv_R --> site #29(area 5), num_server = 9.0, Tq = 0.012613609756159078
+[user44 - area8] serv_A --> site #0(area 0), num_server = 1.0, Tq = 0.0006751054852320675
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user45 - area4] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.00047348484848484844
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user46 - area7] serv_A --> site #33(area 7), num_server = 1.0, Tq = 0.0008684324793747286
+                 serv_R --> site #33(area 7), num_server = 10.0, Tq = 0.004400087116442253
+[user47 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.0009775171065493646
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user48 - area5] serv_A --> site #29(area 5), num_server = 1.0, Tq = 0.0023852116875372684
+                 serv_R --> site #29(area 5), num_server = 9.0, Tq = 0.012613609756159078
+[user49 - area8] serv_A --> site #0(area 0), num_server = 1.0, Tq = 0.0003287851389117212
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user50 - area10] serv_A --> site #38(area 10), num_server = 1.0, Tq = 0.0020703933747412005
+                 serv_R --> site #39(area 10), num_server = 9.0, Tq = 0.012613609756159078
+[user51 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.00047348484848484844
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user52 - area2] serv_A --> site #22(area 2), num_server = 1.0, Tq = 0.0027272727272727275
+                 serv_R --> site #22(area 2), num_server = 10.0, Tq = 0.007826675169362352
+[user53 - area2] serv_A --> site #22(area 2), num_server = 1.0, Tq = 0.0022222222222222222
+                 serv_R --> site #22(area 2), num_server = 10.0, Tq = 0.007826675169362352
+[user54 - area8] serv_A --> site #0(area 0), num_server = 1.0, Tq = 0.0004996668887408394
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user55 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.0015151515151515154
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user56 - area3] serv_A --> site #25(area 3), num_server = 1.0, Tq = 0.00103359173126615
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user57 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.0012419274714356684
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user58 - area7] serv_A --> site #33(area 7), num_server = 1.0, Tq = 0.0018140589569160996
+                 serv_R --> site #33(area 7), num_server = 10.0, Tq = 0.004400087116442253
+[user59 - area8] serv_A --> site #0(area 0), num_server = 1.0, Tq = 0.0006751054852320675
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user60 - area9] serv_A --> site #36(area 9), num_server = 1.0, Tq = 0.000945626477541371
+                 serv_R --> site #36(area 9), num_server = 10.0, Tq = 0.007826675169362352
+[user61 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.0007215007215007214
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user62 - area5] serv_A --> site #29(area 5), num_server = 1.0, Tq = 0.0011344299489506522
+                 serv_R --> site #29(area 5), num_server = 9.0, Tq = 0.012613609756159078
+[user63 - area1] serv_A --> site #21(area 1), num_server = 1.0, Tq = 0.00284629981024668
+                 serv_R --> site #21(area 1), num_server = 9.0, Tq = 0.009311254621790385
+[user64 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.0015151515151515154
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user65 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.00047348484848484844
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+[user66 - area9] serv_A --> site #36(area 9), num_server = 1.0, Tq = 0.0019792182088075217
+                 serv_R --> site #36(area 9), num_server = 10.0, Tq = 0.007826675169362352
+[user67 - area5] serv_A --> site #29(area 5), num_server = 1.0, Tq = 0.003059975520195838
+                 serv_R --> site #29(area 5), num_server = 9.0, Tq = 0.012613609756159078
+[user68 - area3] serv_A --> site #25(area 3), num_server = 1.0, Tq = 0.001587301587301587
+                 serv_R --> site #6(area 0), num_server = 5.0, Tq = 0.015963382144028503
+[user69 - area6] serv_A --> site #5(area 0), num_server = 1.0, Tq = 0.00047348484848484844
+                 serv_R --> site #5(area 0), num_server = 5.0, Tq = 0.01363059304472327
+{'avg_delay': 0.10393248032079076, 'cost': 107.47142857142858, 'target_value': 184.53605174936217, 'running_time': 674.1738319396973, 'local_count': 74, 'common_count': 66}
+
+进程已结束,退出代码0
