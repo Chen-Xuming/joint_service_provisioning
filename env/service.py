@@ -25,8 +25,8 @@ class Service:
         self.price = 0.
 
     """ 卸载到某个节点 """
-    def assign_to_site(self, site:SiteNode):
-        self.node_id = self.node_id
+    def assign_to_site(self, site: SiteNode):
+        self.node_id = site.global_id
         self.num_server = 0
         self.queuing_delay = 0
         if self.service_type == "A":

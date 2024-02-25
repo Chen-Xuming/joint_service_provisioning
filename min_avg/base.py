@@ -74,10 +74,10 @@ class BaseMinAvgAlgorithm:
         for user in self.env.users:     # type: UserNode
             sa_site_area = get_site_area_id(user.service_a.node_id)
             sr_site_area = get_site_area_id(user.service_r.node_id)
-            print("[user{} - area{}] serv_A --> site #{}(area {}), num_server = {}, Tq = {}\n"
-                  "                 serv_R --> site #{}(area {}), num_server = {}, Tq = {}".format(user.user_id, user.area_id,
-                  user.service_a.node_id, sa_site_area, user.service_a.num_server, user.service_a.queuing_delay,
-                  user.service_r.node_id, sr_site_area, user.service_r.num_server, user.service_r.queuing_delay))
+            print("[u{} - area{}] sA --> s #{}(area {}), n_serv = {}, Tq = {}\n"
+                  "              sR --> s #{}(area {}), n_serv = {}, Tq = {}".format(user.user_id, user.area_id,
+                  user.service_a.node_id, sa_site_area, user.service_a.num_server, round(user.service_a.queuing_delay * 1000, 2),
+                  user.service_r.node_id, sr_site_area, user.service_r.num_server, round(user.service_r.queuing_delay * 1000, 2)))
 
 
     """

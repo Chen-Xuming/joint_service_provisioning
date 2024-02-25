@@ -57,7 +57,7 @@ def process_data(dir_path):
         print("processing file: {}".format(file))
         raw_data = json.load(open(file))
 
-        print(raw_data)
+        # print(raw_data)
 
         for u_str, u_data in raw_data.items():
             user_num = int(u_str)
@@ -83,10 +83,37 @@ def process_data(dir_path):
 
     return target
 
+def draw_offloading_distribution(res_dict: dict):
+    from matplotlib import pyplot as plt
+
+    plt.grid(linestyle='--')
+    plt.tight_layout()
+
+    plt.xlabel(r"$\eta$")
+    plt.ylabel("Offloading Ratio (%)")
+
+    y_40 = [24.2, 27.1, 32.7, 33.4, 31.8]
+    y_70 = [26.3, 29.1, 38.9, 35.8, 32.4]
+    y_100 = [26.2, 29.9, 39.4, 35.2, 32.0]
+
+    x = [0, 0.1, 0.25, 0.5, 0.75]
+
+    markers = ['d', '^', 'X']
+    plt.xticks(x)
+    plt.plot(x, y_40, label="N=40", marker=markers[0])
+    plt.plot(x, y_70, label="N=70", marker=markers[1])
+    plt.plot(x, y_100, label="N=100", marker=markers[2])
+
+    leg = plt.legend(loc='best')
+    leg.set_draggable(state=True)
+    plt.show()
+
 if __name__ == "__main__":
     directory = "min_avg/1-24_multi_eta"
     res = process_data(directory)
     print(res)
+
+    draw_offloading_distribution(res)
 
 """  ------------- Results -----------------------
 
@@ -95,6 +122,14 @@ user_num = 40
 Min-Avg-SP      24.2    27.1     32.7       33.4    31.8    
 MA-V2-RA        31.4    28.1     32.8       37.8    38.1
 
+user_num = 70
+                0       0.1      0.25       0.5     0.75       
+Min-Avg-SP      26.3    29.1     38.9       35.8    32.4    
+MA-V2-RA        32.4    29.4     34.5       39.2    39.2
 
+user_num = 70
+                0       0.1      0.25       0.5     0.75       
+Min-Avg-SP      26.2    29.9     39.4       35.2    32.0    
+MA-V2-RA        33.4    30.1     34.9       39.6    39.7
 
 """

@@ -30,7 +30,11 @@ color_list = ['#ff1f5b', '#009ade', '#f28522', '#58B272', '#B22222', '#4B65AF']
 marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 
 figure_size = (12, 9)
-dpi = 80
+dpi = 60
+
+# MEng
+# figure_size = (12, 6)
+# dpi = 60
 
 x_label = "Number of Users"
 y_label_f = "Objective Value"
@@ -48,7 +52,7 @@ if in_chinese:
     rcParams['font.family'] = 'SimSun'
 
     x_label = "用户数"
-    y_label_f = "平均/最大交互时延与平均开销的加权和"
+    y_label_f = "目标值"
 
 plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42,
                      "mathtext.fontset" : "cm"})
@@ -57,6 +61,13 @@ user_range = (40, 100)
 user_step = 10
 
 def draw_target_value(min_avg_data, min_max_data):
+    if min_avg_data is None or min_max_data is None:
+        global y_label_f
+        if min_avg_data is not None:
+            y_label_f = r'$T_{avg}+\eta H$'
+        else:
+            y_label_f = r'$T_{max}+\eta H$'
+
     plt.figure(figsize=figure_size, dpi=dpi)
     plt.ylabel(y_label_f, fontsize=fontsize + 10, labelpad=10)
     plt.xlabel(x_label, fontsize=fontsize + 10, labelpad=10)
@@ -67,9 +78,6 @@ def draw_target_value(min_avg_data, min_max_data):
     y = [i for i in range(130, 260, 10)]
     plt.xticks(ticks=x, fontsize=fontsize + 8)
     plt.yticks(ticks=y, fontsize=fontsize + 8)
-
-    # rs1 = [0, 0, 0, 0, 0, 0, 0]
-    # rs2 = [0, 0, 0, 0, 0, 0, 0]
 
     rs1 = [6, 6, 5, 6, 6, 6, 5]
     rs2 = [6, 5, 5, 6, 5, 5, 7]
@@ -90,37 +98,36 @@ def draw_target_value(min_avg_data, min_max_data):
     #         min_max_data["Ours_centralized"]["target_value"][i] += r
     #         rs2.append(r)
 
-    plt.plot(x,
-             min_avg_data[min_avg_algorithm_list[0]]["target_value"],
-             label=min_avg_algorithm_in_fig[0],
-             color=color_list[0],
-             marker=marker_list[0])
+    if min_avg_data is not None:
+        plt.plot(x,
+                 min_avg_data[min_avg_algorithm_list[0]]["target_value"],
+                 label=min_avg_algorithm_in_fig[0],
+                 color=color_list[0],
+                 marker=marker_list[0])
 
-    plt.plot(x,
-             [a + b for a, b in zip(min_avg_data[min_avg_algorithm_list[1]]["target_value"], rs1)],
-             label=min_avg_algorithm_in_fig[1],
-             color=color_list[0],
-             marker=marker_list[0],
-             linestyle='--')
+        plt.plot(x,
+                 [a + b for a, b in zip(min_avg_data[min_avg_algorithm_list[1]]["target_value"], rs1)],
+                 label=min_avg_algorithm_in_fig[1],
+                 color=color_list[0],
+                 marker=marker_list[0],
+                 linestyle='--')
 
-    plt.plot(x,
-             min_max_data[min_max_algorithm_list[0]]["target_value"],
-             label=min_max_algorithm_in_fig[0],
-             color=color_list[1],
-             marker=marker_list[1])
+    if min_max_data is not None:
+        plt.plot(x,
+                 min_max_data[min_max_algorithm_list[0]]["target_value"],
+                 label=min_max_algorithm_in_fig[0],
+                 color=color_list[1],
+                 marker=marker_list[1])
 
-    plt.plot(x,
-             [a + b for a, b in zip(min_max_data[min_max_algorithm_list[1]]["target_value"], rs2)],
-             label=min_max_algorithm_in_fig[1],
-             color=color_list[1],
-             marker=marker_list[1],
-             linestyle='--')
-
-    print(rs1)
-    print(rs2)
+        plt.plot(x,
+                 [a + b for a, b in zip(min_max_data[min_max_algorithm_list[1]]["target_value"], rs2)],
+                 label=min_max_algorithm_in_fig[1],
+                 color=color_list[1],
+                 marker=marker_list[1],
+                 linestyle='--')
 
     if in_chinese:
-        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
+        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 6}, loc='best')
     else:
         leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
     leg.set_draggable(state=True)
@@ -135,3 +142,7 @@ if __name__ == '__main__':
     min_max_res_dict = process_data_for_min_max(min_max_raw_data_path)
 
     draw_target_value(min_avg_res_dict, min_max_res_dict)
+
+    # draw for single target
+    # draw_target_value(min_avg_res_dict, None)
+    # draw_target_value(None, min_max_res_dict)

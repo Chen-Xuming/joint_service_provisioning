@@ -24,7 +24,13 @@ color_list = ['#ff1f5b', '#009ade', '#f28522', '#58B272', '#B22222', '#4B65AF']
 marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 
 figure_size = (12, 9)
-dpi = 80
+dpi = 60
+
+# MEng
+# figure_size = (13, 6)
+# dpi = 60
+
+shared_legend = False
 
 x_label = "Number of Users"
 y_label_f = r'$T_{max}+\eta H$'
@@ -44,7 +50,7 @@ if in_chinese:
     rcParams['font.family'] = 'SimSun'
 
     x_label = "用户数"
-    y_label_f = "最大交互时延与平均开销的加权和"
+    y_label_f = r'$T_{max}+\eta H$'
     y_label_delay = "最大交互时延（毫秒）"
     y_label_cost = "平均开销"
 
@@ -53,7 +59,7 @@ plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.m
 
 # algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2", "Min-Avg", "Max-First", "Ours"]
 algorithm_list = ["Nearest", "M-Greedy", "M-Greedy-V2(Tx+Tp+Tq)", "Ours"]
-algorithm_name_in_fig = ["Nearest-RA", "M-Greedy-RA", "M-Greedy-V2-RA", "Min-Max-SP"]
+algorithm_name_in_fig = ["Nearest-RA", "M-Greedy-RA", "M-Greedy-V2-RA", "Min-Max-RASP"]
 
 # etas = [0.5, 0.75, 1.0]
 etas = [0.25, 0.5, 0.75]
@@ -185,7 +191,10 @@ def get_offloading_ratio(res_dict):
     return res
 
 def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="Ours", compared_algo="M-Greedy-V2(Tx+Tp+Tq)"):
-    plt.figure(figsize=figure_size, dpi=dpi)
+    fs = figure_size
+    if shared_legend and attribution == "target_value":
+        fs = (figure_size[0], figure_size[1] + 1.8)
+    plt.figure(figsize=fs, dpi=dpi)
 
     y_label = ""
     if attribution == "target_value":
@@ -197,7 +206,6 @@ def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="O
     plt.ylabel(ylabel=y_label, fontsize=fontsize+10, labelpad=10)
     plt.xlabel(x_label, fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
-    plt.tight_layout()
 
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
     plt.xticks(ticks=x, fontsize=fontsize + 8)
@@ -225,13 +233,34 @@ def draw_merged_eta_for_some_attribution(res_dict, attribution: str, our_algo="O
                  marker=marker_list[idx],
                  linestyle="--")
 
-    n_col = 1 if attribution != "max_delay" else 1
-    if in_chinese:
-        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best', ncol=n_col)
+    # n_col = 1 if attribution != "max_delay" else 1
+    # if in_chinese:
+    #     leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 4}, loc='best', ncol=n_col)
+    # else:
+    #     leg = plt.legend(fontsize=fontsize_legend + 4, loc='best', ncol=n_col)
+    # leg.set_draggable(state=True)
+    # plt.show()
+
+    if shared_legend and attribution in ["cost", "max_delay"]:
+        plt.tight_layout()
+        plt.show()
+        return
     else:
-        leg = plt.legend(fontsize=fontsize_legend + 4, loc='best', ncol=n_col)
-    leg.set_draggable(state=True)
-    plt.show()
+        if shared_legend and attribution == "target_value":
+            leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 6},
+                             bbox_to_anchor=(0, 1.02, 1, 0.2), loc="lower left", borderaxespad=0, mode="expand", ncol=2)
+            frame = leg.get_frame()
+            frame.set_linewidth(1.0)
+            frame.set_edgecolor('black')
+        else:
+            if in_chinese:
+                leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 5}, loc='best')
+            else:
+                leg = plt.legend(fontsize=fontsize_legend + 5, loc='best')
+        leg.set_draggable(state=True)
+        plt.tight_layout()
+        plt.show()
+
 
 # fixme
 def draw_merged_eta_for_some_attribution_with_error_bar(res_dict, attribution: str, our_algo="Ours", compared_algo="M-Greedy-V2(Tx+Tp+Tq)"):
@@ -350,17 +379,17 @@ def draw_histogram_with_error_bar(res_dict, attribution: str, our_algo="Ours", c
 
 if __name__ == '__main__':
     file_name = "min_max/12-26_eta{}_new_conf"
-    raw_result = process_data(file_name)
-    print(raw_result)
-
-    target_value_reduction_ratios = get_reduction_ratio(raw_result, "target_value")
-    draw_reduction_ratio(target_value_reduction_ratios, "target_value")
-
-    max_delay_reduction_ratios = get_reduction_ratio(raw_result, "max_delay")
-    draw_reduction_ratio(max_delay_reduction_ratios, "max_delay")
-
-    avg_cost_reduction_ratios = get_reduction_ratio(raw_result, "cost")
-    draw_reduction_ratio(avg_cost_reduction_ratios, "avg_cost")
+    # raw_result = process_data(file_name)
+    # print(raw_result)
+    #
+    # target_value_reduction_ratios = get_reduction_ratio(raw_result, "target_value")
+    # draw_reduction_ratio(target_value_reduction_ratios, "target_value")
+    #
+    # max_delay_reduction_ratios = get_reduction_ratio(raw_result, "max_delay")
+    # draw_reduction_ratio(max_delay_reduction_ratios, "max_delay")
+    #
+    # avg_cost_reduction_ratios = get_reduction_ratio(raw_result, "cost")
+    # draw_reduction_ratio(avg_cost_reduction_ratios, "avg_cost")
 
     # get_and_draw_all_reduction_ratios(raw_result)
     #

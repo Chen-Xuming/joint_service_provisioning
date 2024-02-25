@@ -23,8 +23,14 @@ color_list = ['#58B272', '#009ade', '#ff1f5b']
 # marker_list = ['o', '^', 'X', 'd', 's', 'v', 'P',  '*','>','<','x']
 marker_list = ['d', 'X', 'o', '^', 's', 'v', 'P',  '*','>','<','x']
 
-figure_size = (12, 9)
-dpi = 80
+# figure_size = (12, 9)
+# dpi = 60
+
+# MEng
+figure_size = (12, 6)
+dpi = 60
+
+shared_legend = True
 
 x_label = "Number of Users"
 y_label_f = "Reduction Ratio of " + r"$T_{avg}+\eta H$" + " (%)"
@@ -38,13 +44,13 @@ if black_and_white_style:
     markersize = 13
 
 # 中文
-in_chinese = False
+in_chinese = True
 if in_chinese:
     from matplotlib import rcParams
     rcParams['font.family'] = 'SimSun'
 
     x_label = "用户数"
-    y_label_f = "平均交互时延与平均开销加权和的减小率（%）"
+    y_label_f = r"$T_{avg}+\eta H$" + " 减小率（%）"
     y_label_delay = "平均交互时延减小率（%）"
     y_label_cost = "平均开销减小率（%）"
 
@@ -127,7 +133,6 @@ def draw_reduction_ratio(reduction_ratios, attribute: str):
     plt.ylabel(y_label, ylabel_font, labelpad=10)
     plt.xlabel(x_label, fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
-    plt.tight_layout()
 
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
     plt.xticks(ticks=x, fontsize=fontsize+8)
@@ -145,13 +150,25 @@ def draw_reduction_ratio(reduction_ratios, attribute: str):
         plt.plot(x, ratios, label=r'$\eta={}$'.format(eta), color=color_list[idx], marker=marker_list[idx])
         idx += 1
 
-    if in_chinese:
-        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
+    if shared_legend and attribute in ["cost", "avg_delay"]:
+        plt.tight_layout()
+        plt.show()
+        return
     else:
-        leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
-    leg.set_draggable(state=True)
-
-    plt.show()
+        if shared_legend and attribute == "target_value":
+            leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 6},
+                             bbox_to_anchor=(0, 1.02, 1, 0.2), loc="lower left", borderaxespad=0, mode="expand", ncol=3)
+            frame = leg.get_frame()
+            frame.set_linewidth(1.0)
+            frame.set_edgecolor('black')
+        else:
+            if in_chinese:
+                leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 5}, loc='best')
+            else:
+                leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
+        leg.set_draggable(state=True)
+        plt.tight_layout()
+        plt.show()
 
 def get_and_draw_all_reduction_ratios(res_dict, origin_algo="Modify-Assignment(Tx+Tp+Tq)"):
     target_value_rr = get_reduction_ratio(raw_result, original_algorithm=origin_algo, attribute="target_value")

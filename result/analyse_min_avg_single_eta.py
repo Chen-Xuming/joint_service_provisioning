@@ -21,7 +21,13 @@ color_list = ['#58B272', '#f28522', '#009ade', '#ff1f5b']
 marker_list = ['d', '^', 'X', 'o', 's', 'v', 'P',  '*','>','<','x']
 
 figure_size = (12, 9)
-dpi = 80
+dpi = 60
+
+# MEng
+# figure_size = (12, 6)
+# dpi = 60
+
+shared_legend = False
 
 x_label = "Number of Users"
 y_label_f = r'$T_{avg}+\eta H$'
@@ -41,18 +47,33 @@ if in_chinese:
     rcParams['font.family'] = 'SimSun'
 
     x_label = "用户数"
-    y_label_f = "平均交互时延与平均开销的加权和"
+    y_label_f = r'$T_{avg}+\eta H$'
     y_label_delay = "平均交互时延（毫秒）"
     y_label_cost = "平均开销"
+
+# config = {
+#     "font.family": 'serif',  # 衬线字体
+#     "font.size": fontsize,
+#     'lines.linewidth':linewidth,
+#     'lines.markersize':markersize,
+#     'pdf.fonttype':42,
+#     "font.serif": ['SimSun'],  # 宋体
+#     "mathtext.fontset": 'cm',  # matplotlib渲染数学字体时使用的字体，和Times New Roman差别不大
+# }
+# if in_chinese:
+#     plt.rcParams.update(config)
+# else:
+#     plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42,
+#                          "mathtext.fontset" : "cm"})
 
 plt.rcParams.update({'font.size':fontsize, 'lines.linewidth':linewidth, 'lines.markersize':markersize, 'pdf.fonttype':42, 'ps.fonttype':42,
                      "mathtext.fontset" : "cm"})
 
-algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
-algorithm_in_fig = ["Nearest-RA", "Modify-Assignment-RA", "Modify-Assignment-V2-RA", "Min-Avg-SP"]
+# algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
+# algorithm_in_fig = ["Nearest-RA", "Modify-Assignment-RA", "Modify-Assignment-V2-RA", "Min-Avg-RASP"]
 #
-# algorithm_list = ["Ours", "Ours_centralized"]
-# algorithm_in_fig = ["Min-Avg-SP", "Min-Avg-SP-Collocating"]
+algorithm_list = ["Ours", "Ours_centralized"]
+algorithm_in_fig = ["Min-Avg-RASP", "Min-Avg-RASP-Collocating"]
 
 
 # 获取一组实验的json文件的路径
@@ -169,11 +190,12 @@ def draw_avg_delay(data: dict):
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["avg_delay"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    if in_chinese:
-        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
-    else:
-        leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
-    leg.set_draggable(state=True)
+    if not shared_legend:
+        if in_chinese:
+            leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
+        else:
+            leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
+        leg.set_draggable(state=True)
     plt.show()
 
 def draw_avg_cost(data: dict):
@@ -193,11 +215,12 @@ def draw_avg_cost(data: dict):
     for idx, algo in enumerate(algorithm_list):
         plt.plot(x, data[algo]["cost"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
-    if in_chinese:
-        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
-    else:
-        leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
-    leg.set_draggable(state=True)
+    if not shared_legend:
+        if in_chinese:
+            leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 2}, loc='best')
+        else:
+            leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
+        leg.set_draggable(state=True)
     plt.show()
 
 def draw_target_value(data: dict):
@@ -206,11 +229,14 @@ def draw_target_value(data: dict):
         'size': fontsize+10
     }
 
-    plt.figure(figsize=figure_size, dpi=dpi)
+    fs = figure_size
+    if shared_legend:
+        fs = (figure_size[0], figure_size[1]+1.5)
+
+    plt.figure(figsize=fs, dpi=dpi)
     plt.ylabel(y_label_f, ylabel_font, labelpad=10)
     plt.xlabel(x_label, fontsize=fontsize+10, labelpad=10)
     plt.grid(linestyle='--')
-    plt.tight_layout()
 
     x = [i for i in range(user_range[0], user_range[1] + user_step, user_step)]
     plt.xticks(ticks=x, fontsize=fontsize + 8)
@@ -220,10 +246,22 @@ def draw_target_value(data: dict):
         plt.plot(x, data[algo]["target_value"], label=algorithm_in_fig[idx], color=color_list[idx], marker=marker_list[idx])
 
     if in_chinese:
-        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 8}, loc='best')
+        # leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 6}, loc='best')
+        # leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
+        leg = plt.legend(prop={'family': 'Times New Roman', 'size': fontsize_legend + 5},
+                         bbox_to_anchor=(0, 1.02, 1, 0.2), loc="lower left", borderaxespad=0, mode="expand", ncol=2)
     else:
         leg = plt.legend(fontsize=fontsize_legend + 6, loc='best')
     leg.set_draggable(state=True)
+
+    if shared_legend:
+        frame = leg.get_frame()
+        frame.set_linewidth(1.0)
+        frame.set_edgecolor('black')
+
+    plt.tight_layout()
+
+    plt.savefig('temp.pdf', bbox_inches='tight')
     plt.show()
 
 def draw_running_time(data: dict):
@@ -287,10 +325,13 @@ def draw_figures_shared_legend(data: dict):
     plt.show()
 
 if __name__ == '__main__':
-    eta = 0.5
+    eta = 0
     if eta == 0:
+        shared_legend = False
+        if in_chinese:
+            figure_size = (12, 8)
         algorithm_list = ["Nearest", "Modify-Assignment(Tx)", "Modify-Assignment(Tx+Tp+Tq)", "Ours"]
-        algorithm_in_fig = ["Nearest", "Modify-Assignment", "Modify-Assignment-V2", "Min-Avg-SP"]
+        algorithm_in_fig = ["Nearest", "Modify-Assignment", "Modify-Assignment-V2", "Min-Avg-RASP"]
 
     raw_data_path = "min_avg/12-26_eta{}_new_conf".format(eta)
     res_dict = process_data(raw_data_path)
